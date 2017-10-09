@@ -2,10 +2,7 @@
 load('data.mat');
 
 filtered_s = dsnew();
-
-res{1} = cell(4,10);
-res{2} = cell(4,10);
-res{3} = cell(4,10);
+normalized_s = dsnew();
 
 
 %% filter data
@@ -39,8 +36,6 @@ end
 
 %% z-normalization
 
-normalized_s = dsnew();
-
 for s_id = 1:3
     for a_id = 1:4
         for v_id = 1:10
@@ -55,6 +50,18 @@ for s_id = 1:3
     end
 end
 
-plot(dsget(normalized_s,1,1,1));
+%plot(dsget(normalized_s,1,1,1));
 
-%% extract features
+%% extract features for each sensor
+features_ds = dsnew();
+
+for s_id = 1:3
+    for a_id = 1:4
+        for v_id = 1:10
+            feat = getfeatures(dsget(normalized_s,s_id,a_id,v_id), 't');
+            features_ds = dsputfeatures(features_ds,feat,s_id,a_id,v_id);
+        end
+    end
+end
+
+
