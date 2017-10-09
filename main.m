@@ -8,9 +8,8 @@ res{2} = cell(4,10);
 res{3} = cell(4,10);
 
 
-%% pre-process data
+%% filter data
 
-%filtering
 for s_id = 1:3                          %for each sensor
     for a_id = 1:4                      %for each actovity
         for v_id  = 1:10                %for each volunteer
@@ -20,12 +19,11 @@ for s_id = 1:3                          %for each sensor
     end
 end
 
-plot(dsget(data,1,1,1));
-hold on 
-plot(dsget(filtered_s,1,1,1));
+%plot(dsget(data,1,1,1));
+%hold on 
+%plot(dsget(filtered_s,1,1,1));
 
-%% bla
-%subtract mean value
+%% subtract mean value
 
 for s_id = 1:3
     for a_id = 1:4
@@ -36,20 +34,27 @@ for s_id = 1:3
     end
 end
 
-plot(dsget(filtered_s,1,1,1));
+%plot(dsget(filtered_s,1,1,1));
 
 
-%delete outliers(?)
-% for s_id = 1:3
-%     for a_id = 1:4
-%         for v_id = 1:10
-%             %sensor i, activity j, volunteer k
-%             res{s_id}{a_id,v_id}(:,1)= isoutlier(filtered_s{s_id}{a_id,v_id}(:,1))
-%         end
-%     end
-% end
+%% z-normalization
 
-%plot(res{1}{1,1}(:,1) * 1.3 * (10^4))
+normalized_s = dsnew();
 
-%normalization
+for s_id = 1:3
+    for a_id = 1:4
+        for v_id = 1:10
+            s = dsget(filtered_s,s_id,a_id,v_id);
+            %compute standard deviation for each signal
+            standard_dev = std(s);
+            %divide the signal for the standard deviation
+            normalized_signal = s/standard_dev;
+            normalized_s = dsput(normalized_s, normalized_signal, s_id,...
+                a_id, v_id);     
+        end
+    end
+end
 
+plot(dsget(normalized_s,1,1,1));
+
+%% extract features
