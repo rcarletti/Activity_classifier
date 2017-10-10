@@ -3,6 +3,9 @@ load('data.mat');
 
 filtered_s = dsnew();
 normalized_s = dsnew();
+total_features = 0;
+chosen_features_num = 4;
+
 
 
 %% filter data
@@ -61,20 +64,52 @@ for s_id = 1:3
             feat_t = getfeatures(dsget(normalized_s,s_id,a_id,v_id), 't');
             feat_f = getfeatures(dsget(normalized_s,s_id,a_id,v_id), 'f');
             feat = [feat_t, feat_f];
+            total_features = length(feat);
             features_ds = dsputfeatures(features_ds,feat,s_id,a_id,v_id);
         end
     end
 end
 
-%% create targets for the neural network (4 features)
+%% create and train neural nwtworks (4 features)
+
+targets = zeros(4, 40, 3);
 
 for s_id = 1:3
-    targets{s_id} = [ones(1,10), zeros(1,10), zeros(1,10), zeros(1,10);...
-                    zeros(1,10), ones(1,10),  zeros(1,10), zeros(1,10);...
-                    zeros(1,10), zeros(1,10), ones(1,10),  zeros(1,10);...
-                    zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10)];
+    targets(:,:,s_id) = [ones(1,10),  zeros(1,10), zeros(1,10), zeros(1,10);...
+                         zeros(1,10), ones(1,10),  zeros(1,10), zeros(1,10);...
+                         zeros(1,10), zeros(1,10), ones(1,10),  zeros(1,10);...
+                         zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10)];
 end
 
-%% create input vectors for the neural network
+% find (n,k) combinations of features
+features_positions = [1:total_features];
+C = nchoosek(features_positions,chosen_features_num);
+nets_num = nchoosek(total_features, chosen_features_num);
+
+% create input vectors
+inputs = cell(1,3);
+inputs{1} = zeros(4, 40, size(C,1));        %sensor #1
+inputs{2} = zeros(4, 40, size(C,1));        %sensor #2
+inputs{3} = zeros(4, 40, size(C,1));        %sensor #3
+
+for s_id = 1:3
+    for t_id = 1:size(C,1)
+        for a_id = 1:4
+            for v_id = 1:10
+                for f_id = 1:chosen_features_num
+                    inputs{s_id}(f_id, ((a_id-1) * 10) + v_id, t_id) = ...
+                        dsgetfeature(features_ds, C(t_id, f_id), s_id, a_id, v_id);
+                end
+            end
+        end
+    end
+end
+
+
+%% create (n,k) neural networks for each sensor and train them
+
+[neural_networks_1, results_nn_1, performance_nn_1] = createandtrainnn(1,inputs,targets, nets_num);
+[neural_networks_2, results_nn_2, performance_nn_2] = createandtrainnn(2,inputs,targets, nets_num);
+[neural_networks_3, results_nn_3, performance_nn_3] = createandtrainnn(3,inputs,targets, nets_num);
 
 
