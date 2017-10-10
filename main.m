@@ -134,10 +134,10 @@ for i=1:population_size
 end
 
 options = gaoptimset(@ga);
-options.PopulationType = 'bitString';
+options.PopulationType = 'doubleVector';
 options.InitialPopulation = population;
 options.useParallel = 'true';
-
+intcon = (1:11);
 x_s1 = ga(@(x) fitnessfunction(x, 1, inputs, targets),...
-    total_features,[],[],[],[],[],[],@constraintfile,options);
+    total_features,[],[],[],[],0,1,[],intcon,options);
 
