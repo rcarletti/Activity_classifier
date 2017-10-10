@@ -1,12 +1,10 @@
-%% main
 load('data.mat');
 
 filtered_s = dsnew();
 normalized_s = dsnew();
-total_features = 0;
 chosen_features_num = 4;
 
-
+global total_features;
 
 %% filter data
 
@@ -57,7 +55,6 @@ end
 
 %% extract features for each sensor
 features_ds = dsnew();
-global total_features
 
 for s_id = 1:3
     for a_id = 1:4
@@ -73,14 +70,10 @@ end
 
 %% create and train neural nwtworks (4 features)
 
-targets = zeros(4, 40, 3);
-
-for s_id = 1:3
-    targets(:,:,s_id) = [ones(1,10),  zeros(1,10), zeros(1,10), zeros(1,10);...
-                         zeros(1,10), ones(1,10),  zeros(1,10), zeros(1,10);...
-                         zeros(1,10), zeros(1,10), ones(1,10),  zeros(1,10);...
-                         zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10)];
-end
+targets = [ones(1,10),  zeros(1,10), zeros(1,10), zeros(1,10);...
+           zeros(1,10), ones(1,10),  zeros(1,10), zeros(1,10);...
+           zeros(1,10), zeros(1,10), ones(1,10),  zeros(1,10);...
+           zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10)];
 
 global C;
 global nets_num;
@@ -110,13 +103,12 @@ end
 
 
 %% create (n,k) neural networks for each sensor and train them
-global neural_networks_1
-global neural_networks_2
-global neural_networks_3
+global neural_networks;
 
-neural_networks_1 = createandtrainnn(1,inputs,targets, nets_num);
-neural_networks_2 = createandtrainnn(2,inputs,targets, nets_num);
-neural_networks_3 = createandtrainnn(3,inputs,targets, nets_num);
+neural_networks = cell(1,3);
+neural_networks{1} = createandtrainnn(1, inputs, targets, nets_num);
+neural_networks{2} = createandtrainnn(2, inputs, targets, nets_num);
+neural_networks{3} = createandtrainnn(3, inputs, targets, nets_num);
 
 %% genetic algorithm
 
@@ -141,6 +133,6 @@ options.useParallel = 'true';
 intcon = (1:11);
 nonlinearcon = @(x)nonlcon(x);
 
-x_s1 = ga(@(x) fitnessfunction(x, 1, inputs, targets),...
-    total_features, [], [], [], [], zeros(1,11), ones(1,11), nonlinearcon, intcon, options)
+x_s1 = ga(@(x) fitnessfunction(x, 1), total_features, [], [], [], [], ...
+    zeros(1,11), ones(1,11), nonlinearcon, intcon, options)
 

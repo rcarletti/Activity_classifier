@@ -1,19 +1,30 @@
-function [neural_networks] = createandtrainnn(sensor_num,inputs,targets, nets_num)
+function [nns] = createandtrainnn(sensor_num,inputs,targets, nets_num)
 %creates and trains nets_num neural networks with inputs and targets from sensor
 %sensor_num
-    neural_networks = cell(1,nets_num);
+    global C
+
+    train_iter = 5;
+    nns = cell(1,nets_num);
+
     for i=1:nets_num
-        neural_networks{i} = patternnet(10);
-        neural_networks{i}.divideParam.trainRatio = 70/100;
-        neural_networks{i}.divideParam.valRatio = 15/100;
-        neural_networks{i}.divideParam.testRatio = 15/100;
-        for j=1:5
-            %train 5 times
-            neural_networks{i} = train(neural_networks{i},inputs{sensor_num}(:,:,1), targets(:,:,1));
+        nns{i} = {};
+        
+        nns{i}.net = patternnet(10);
+        nns{i}.net.divideParam.trainRatio = 70/100;
+        nns{i}.net.divideParam.valRatio = 15/100;
+        nns{i}.net.divideParam.testRatio = 15/100;
+
+        nns{i}.inputs = inputs{sensor_num}(:,:,i);
+        nns{i}.targets = targets;
+        nns{i}.features = C(i,:);
+        
+        for j=1:train_iter
+            nns{i}.net = train(nns{i}.net, ...
+                nns{i}.inputs, nns{i}.targets);
         end
-        %results_nn{i} = neural_networks{i}(inputs{sensor_num}(:,:,1));
-        %performance_nn{i} = perform(neural_networks{i},targets(:,:,1),results_nn{i});
+
+        nns{i}.results = nns{i}.net(nns{i}.inputs);
+        nns{i}.perf = perform(nns{i}.net, nns{i}.targets, nns{i}.results);
+        nns{i}.conf = confusion(nns{i}.targets, nns{i}.results);
     end
-
 end
-
