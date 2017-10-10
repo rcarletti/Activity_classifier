@@ -81,6 +81,7 @@ for s_id = 1:3
                          zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10)];
 end
 
+global C;
 % find (n,k) combinations of features
 features_positions = [1:total_features];
 C = nchoosek(features_positions,chosen_features_num);
@@ -107,6 +108,9 @@ end
 
 
 %% create (n,k) neural networks for each sensor and train them
+global neural_networks_1
+global neural_networks_2
+global neural_networks_3
 
 neural_networks_1 = createandtrainnn(1,inputs,targets, nets_num);
 neural_networks_2 = createandtrainnn(2,inputs,targets, nets_num);
@@ -115,11 +119,11 @@ neural_networks_3 = createandtrainnn(3,inputs,targets, nets_num);
 %% genetic algorithm
 
 population_size = 100;
-options = gaoptimset;
 population = zeros(100, total_features);
 rng('shuffle');
 
-%generate random population
+%generate random population (pop_size x total_features array, features set to 1 are
+%the chosen features for that individual
 for i=1:population_size
     feat_perm = randperm(total_features, chosen_features_num);
     for f_id =1:chosen_features_num
@@ -127,6 +131,11 @@ for i=1:population_size
     end
 end
 
+options = gaoptimset(@ga);
+options.PopulationType = 'bitString';
+options.InitialPopulation = population;
+options.useParallel = 'true';
 
-
+x_s1 = ga(@(x) fitnessfunction(x, 1, inputs, targets),...
+    total_features,[],[],[],[],[],[],[],options);
 

@@ -2,8 +2,6 @@ function [neural_networks] = createandtrainnn(sensor_num,inputs,targets, nets_nu
 %creates and trains nets_num neural networks with inputs and targets from sensor
 %sensor_num
     neural_networks = cell(1,nets_num);
-    results_nn = cell(1,nets_num);
-    performance_nn = cell(1,nets_num);
     for i=1:nets_num
         neural_networks{i} = patternnet(10);
         neural_networks{i}.divideParam.trainRatio = 70/100;

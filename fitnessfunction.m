@@ -1,12 +1,20 @@
-function [y] = fitnessfunction(nets_num,neural_networks,sensor_num,inputs,targets)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-    results_nn = cell(1,nets_num);
-    performance_nn = cell(1,nets_num);
-    for i=1:net_nums
-        results_nn{i} = neural_networks{i}(inputs{sensor_num}(:,:,1));
-        performance_nn{i} = perform(neural_networks{i},targets(:,:,1),results_nn{i});
+function [conf] = fitnessfunction(feature_set,sensor_num, inputs, targets)
+%retrieves the nn trained with the features specified in the feature set
+%and computes the confusion associated to it.
+    j = 1;
+    features(1,4) = [];
+    for i=1:total_features
+        if feature_set(i) == 1
+            features(j) = i;
+            j = j+1;
+        end
     end
-    y = min(performance_nn);
+    
+    disp(features)
+      
+    network, index = getnetworkbyfeatures(features, sensor_num);
+    results = network(inputs{sensor_num}(:,:,1));
+    conf = confusion(targets(:,:,1), results);
+   
 end
 
