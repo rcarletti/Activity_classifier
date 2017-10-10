@@ -106,61 +106,25 @@ for s_id = 1:3
 end
 
 
+%% create (n,k) neural networks for each sensor and train them
 
-%% sensor 1 networks
-% create (n,k) neural networks and train them
+neural_networks_1 = createandtrainnn(1,inputs,targets, nets_num);
+neural_networks_2 = createandtrainnn(2,inputs,targets, nets_num);
+neural_networks_3 = createandtrainnn(3,inputs,targets, nets_num);
 
-neural_networks_1 = cell(1,nets_num);
-results_nn_1 = cell(1,nets_num);
-performance_nn_1 = cell(1,nets_num);
+%% genetic algorithm
 
-for i=1:nets_num
-    neural_networks_1{i} = patternnet(10);
-    neural_networks_1{i}.divideParam.trainRatio = 70/100;
-    neural_networks_1{i}.divideParam.valRatio = 15/100;
-    neural_networks_1{i}.divideParam.testRatio = 15/100;
-    neural_networks_1{i} = train(neural_networks_1{i},inputs{1}(:,:,1), targets(:,:,1));
-    results_nn_1{i} = neural_networks_1{i}(inputs{1}(:,:,1));
-    performance_nn_1{i} = perform(neural_networks_1{i},targets(:,:,1),results_nn_1{i});
-end
+population_size = 100;
+options = gaoptimset;
+population = zeros(100, total_features);
+rng('shuffle');
 
-%% sensor 2 networks
-% create (n,k) neural networks and train them
 
-neural_networks_2 = cell(1,nets_num);
-results_nn_2 = cell(1,nets_num);
-performance_nn_2 = cell(1,nets_num);
-
-for i=1:nets_num
-    neural_networks_2{i} = patternnet(10);
-    neural_networks_2{i}.divideParam.trainRatio = 70/100;
-    neural_networks_2{i}.divideParam.valRatio = 15/100;
-    neural_networks_2{i}.divideParam.testRatio = 15/100;
-    neural_networks_2{i} = train(neural_networks_2{i},inputs{2}(:,:,1), targets(:,:,1));
-    results_nn_2{i} = neural_networks_2{i}(inputs{2}(:,:,1));
-    performance_nn_2{i} = perform(neural_networks_2{i},targets(:,:,1),results_nn_2{i});
-end
-
-%% sensor 3 networks
-% create (n,k) neural networks and train them
-
-neural_networks_3 = cell(1,nets_num);
-results_nn_3 = cell(1,nets_num);
-performance_nn_2 = cell(1,nets_num);
-
-for i=1:nets_num
-    neural_networks_2{i} = patternnet(10);
-    neural_networks_2{i}.divideParam.trainRatio = 70/100;
-    neural_networks_2{i}.divideParam.valRatio = 15/100;
-    neural_networks_2{i}.divideParam.testRatio = 15/100;
-    neural_networks_2{i} = train(neural_networks_2{i},inputs{2}(:,:,1), targets(:,:,1));
-    results_nn_2{i} = neural_networks_2{i}(inputs{2}(:,:,1));
-    performance_nn_2{i} = perform(neural_networks_2{i},targets(:,:,1),results_nn_2{i});
+for i=1:population_size
+    p = randperm(total_features, chosen_features_num);
+    population
 end
 
 
-% net = patternnet(15);
-% net = train(net, inputs(:,:,1), targets(:,:,1));
-% view(net);
-% y = net(inputs(:,:,1));
-% perf = perform(net, targets(:,:,1), y);
+
+

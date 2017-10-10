@@ -108,8 +108,25 @@ end
 
 %% create (n,k) neural networks for each sensor and train them
 
-[neural_networks_1, results_nn_1, performance_nn_1] = createandtrainnn(1,inputs,targets, nets_num);
-[neural_networks_2, results_nn_2, performance_nn_2] = createandtrainnn(2,inputs,targets, nets_num);
-[neural_networks_3, results_nn_3, performance_nn_3] = createandtrainnn(3,inputs,targets, nets_num);
+neural_networks_1 = createandtrainnn(1,inputs,targets, nets_num);
+neural_networks_2 = createandtrainnn(2,inputs,targets, nets_num);
+neural_networks_3 = createandtrainnn(3,inputs,targets, nets_num);
+
+%% genetic algorithm
+
+population_size = 100;
+options = gaoptimset;
+population = zeros(100, total_features);
+rng('shuffle');
+
+%generate random population
+for i=1:population_size
+    feat_perm = randperm(total_features, chosen_features_num);
+    for f_id =1:chosen_features_num
+        population(i,feat_perm(f_id)) = 1;
+    end
+end
+
+
 
 
