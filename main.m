@@ -137,7 +137,10 @@ options = gaoptimset(@ga);
 options.PopulationType = 'doubleVector';
 options.InitialPopulation = population;
 options.useParallel = 'true';
+
 intcon = (1:11);
+nonlinearcon = @(x)nonlcon(x);
+
 x_s1 = ga(@(x) fitnessfunction(x, 1, inputs, targets),...
-    total_features,[],[],[],[],0,1,[],intcon,options);
+    total_features, [], [], [], [], zeros(1,11), ones(1,11), nonlinearcon, intcon, options)
 

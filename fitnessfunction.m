@@ -13,9 +13,7 @@ function [conf] = fitnessfunction(feature_set,sensor_num, inputs, targets)
             end
         end
     end
-    
-    disp(features)
-      
+
     nn = getnetworkbyfeatures(features, sensor_num);
     results = nn(inputs{sensor_num}(:,:,1));
     conf = confusion(targets(:,:,1), results);
