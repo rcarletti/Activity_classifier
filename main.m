@@ -57,6 +57,7 @@ end
 
 %% extract features for each sensor
 features_ds = dsnew();
+global total_features
 
 for s_id = 1:3
     for a_id = 1:4
@@ -82,6 +83,7 @@ for s_id = 1:3
 end
 
 global C;
+global nets_num;
 % find (n,k) combinations of features
 features_positions = [1:total_features];
 C = nchoosek(features_positions,chosen_features_num);
@@ -137,5 +139,5 @@ options.InitialPopulation = population;
 options.useParallel = 'true';
 
 x_s1 = ga(@(x) fitnessfunction(x, 1, inputs, targets),...
-    total_features,[],[],[],[],[],[],[],options);
+    total_features,[],[],[],[],[],[],@constraintfile,options);
 
