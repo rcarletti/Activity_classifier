@@ -67,7 +67,7 @@ best_features_4cc = cell(1,3);
 
 for s_id=1:3
     %get the best set of features for each sensor
-    best_features_4cc{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id), total_features, [], [], [], [], ...
+    best_features_4cc{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id, '4cc'), total_features, [], [], [], [], ...
             zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
 end
 
@@ -75,7 +75,7 @@ end
 %% compute accuracy for each sensor (4 class classifier)
 for s_id=1:3
     feat = best_features_4cc{1,s_id}{1};
-    net = getnetworkbyfeatures(feat, s_id);
+    net = getnetworkbyfeatures(feat, s_id,'4cc');
     best_features_4cc{1,s_id}{2} = 1-net.conf;
 end
 

@@ -1,5 +1,9 @@
-function [nn] = getnetworkbyfeatures(features, sensor)
+function [nn] = getnetworkbyfeatures(features, sensor, nn_type)
     global neural_networks
+    global neural_networks_1vsall;
+    global neural_networks_2vsall;
+    global neural_networks_3vsall;
+    global neural_networks_4vsall;
     global C
     global total_features
     
@@ -14,10 +18,20 @@ function [nn] = getnetworkbyfeatures(features, sensor)
         end
         features = app;
     end
-
+    disp(nn_type)
     for i = 1:size(C, 1)
         if isequal(C(i,:),features)
-            nn = neural_networks{sensor}{i};
+            if strcmp(nn_type,'4cc')
+                    nn = neural_networks{sensor}{i};
+                elseif strcmp(nn_type,'1vsall')
+                    nn = neural_networks_1vsall{sensor}{i};
+                elseif strcmp(nn_type,'2vsall')
+                    nn = neural_networks_2vsall{sensor}{i};
+                elseif strcmp(nn_type,'3vsall')
+                    nn = neural_networks_3vsall{sensor}{i};
+                else 
+                    nn = neural_networks_4vsall{sensor}{i};
+            end
             break;
         end
     end

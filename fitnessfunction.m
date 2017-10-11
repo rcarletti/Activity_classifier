@@ -1,4 +1,4 @@
-function [conf] = fitnessfunction(feature_set, sensor_num)
+function [conf] = fitnessfunction(feature_set, sensor_num, nn_type)
 %retrieves the nn trained with the features specified in the feature set
 %and computes the confusion associated to it.
     global total_features
@@ -10,7 +10,7 @@ function [conf] = fitnessfunction(feature_set, sensor_num)
             j = j+1;
         end
     end
-
-    nn = getnetworkbyfeatures(features, sensor_num);
+    
+    nn = getnetworkbyfeatures(features, sensor_num, nn_type);
     conf = nn.conf;
 end
