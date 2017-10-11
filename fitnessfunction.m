@@ -12,5 +12,5 @@ function [conf] = fitnessfunction(feature_set, sensor_num)
     end
 
     nn = getnetworkbyfeatures(features, sensor_num);
-    conf = 1-nn.conf;
+    conf = nn.conf;
 end

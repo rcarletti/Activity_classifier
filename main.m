@@ -53,7 +53,7 @@ end
 
 %plot(dsget(normalized_s,1,1,1));
 
-%% extract features for each sensor
+%% extract features for each sensor (4 class classifier)
 features_ds = dsnew();
 
 for s_id = 1:3
@@ -68,7 +68,7 @@ for s_id = 1:3
     end
 end
 
-%% create and train neural nwtworks (4 features)
+%% create and train neural networks (4 class classifier)
 
 targets = [ones(1,10),  zeros(1,10), zeros(1,10), zeros(1,10);...
            zeros(1,10), ones(1,10),  zeros(1,10), zeros(1,10);...
@@ -102,7 +102,7 @@ for s_id = 1:3
 end
 
 
-%% create (n,k) neural networks for each sensor and train them
+%% create (n,k) neural networks for each sensor and train them (4 class classifier)
 global neural_networks;
 
 neural_networks = cell(1,3);
@@ -110,7 +110,7 @@ neural_networks{1} = createandtrainnn(1, inputs, targets, nets_num);
 neural_networks{2} = createandtrainnn(2, inputs, targets, nets_num);
 neural_networks{3} = createandtrainnn(3, inputs, targets, nets_num);
 
-%% genetic algorithm
+%% genetic algorithm (4 class classifier)
 
 population_size = 100;
 population = zeros(100, total_features);
@@ -133,6 +133,36 @@ options.useParallel = 'true';
 intcon = (1:11);
 nonlinearcon = @(x)nonlcon(x);
 
-x_s1 = ga(@(x) fitnessfunction(x, 1), total_features, [], [], [], [], ...
-    zeros(1,11), ones(1,11), nonlinearcon, intcon, options)
+best_features_4cc = cell(1,3);
+
+for s_id=1:3
+    %get the best set of features for each sensor
+    best_features_4cc{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id), total_features, [], [], [], [], ...
+            zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
+end
+
+
+%% compute accuracy for each sensor (4 class classifier)
+for s_id=1:3
+    feat = best_features_4cc{1,s_id}{1};
+    net = getnetworkbyfeatures(feat, s_id);
+    best_features_4cc{1,s_id}{2} = 1-net.conf;
+end
+
+%% choose the best sensor for the four class classifier
+
+
+max = 0;
+s_index = 1;
+for s_id=1:3
+    if best_features_4cc{1,s_id}{2} > max
+        max = best_features_4cc{1,s_id}{2};
+        s_index = s_id;
+    end
+end
+
+best_sensor_4cc.index = s_index;
+best_sensor_4cc.features = best_features_4cc{1,s_index}{1};
+best_sensor_4cc.accuracy = max;
+
 
