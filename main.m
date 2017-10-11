@@ -197,12 +197,19 @@ end
 
 neural_networks_2vsall = cell(1,3);
 for s_id =1:3
-    neural_networks_2vsall{s_id} = createandtrainnn(s_id, inputs_1vsall, ...
+    neural_networks_2vsall{s_id} = createandtrainnn(s_id, inputs_2vsall, ...
                                 targets_onevsall{2}, nets_num);
 end
 
 neural_networks_3vsall = cell(1,3);
 for s_id =1:3
-    neural_networks_3vsall{s_id} = createandtrainnn(s_id, inputs_1vsall, ...
+    neural_networks_3vsall{s_id} = createandtrainnn(s_id, inputs_3vsall, ...
                                 targets_onevsall{3}, nets_num);
 end
+
+neural_networks_4vsall = cell(1,3);
+for s_id =1:3
+    neural_networks_4vsall{s_id} = createandtrainnn(s_id, inputs_4vsall, ...
+                                targets_onevsall{4}, nets_num);
+end
+
