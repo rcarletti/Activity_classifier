@@ -99,5 +99,94 @@ for s_id=1:3
             zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
 end
 
+%% compute accuracy for each sensor for each classifier
+
+%1 vs all
+for s_id=1:3
+    feat = best_features_1vsall{1,s_id}{1};
+    net = getnetworkbyfeatures(feat, s_id,'1vsall');
+    best_features_1vsall{1,s_id}{2} = 1-net.conf;
+end
+
+%2 vs all
+for s_id=1:3
+    feat = best_features_2vsall{1,s_id}{1};
+    net = getnetworkbyfeatures(feat, s_id,'2vsall');
+    best_features_2vsall{1,s_id}{2} = 1-net.conf;
+end
+
+%3 vs all
+for s_id=1:3
+    feat = best_features_3vsall{1,s_id}{1};
+    net = getnetworkbyfeatures(feat, s_id,'3vsall');
+    best_features_3vsall{1,s_id}{2} = 1-net.conf;
+end
+
+%4 vs all
+for s_id=1:3
+    feat = best_features_4vsall{1,s_id}{1};
+    net = getnetworkbyfeatures(feat, s_id,'4vsall');
+    best_features_4vsall{1,s_id}{2} = 1-net.conf;
+end
+
+%% choose the best sensor for each activity 
+
+%1 vs all
+max = 0;
+s_index = 1;
+for s_id=1:3
+    if best_features_1vsall{1,s_id}{2} > max
+        max = best_features_1vsall{1,s_id}{2};
+        s_index = s_id;
+    end
+end
+
+best_sensor_1vsall.index = s_index;
+best_sensor_1vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_1vsall.accuracy = max;
+
+%2 vs all
+max = 0;
+s_index = 1;
+for s_id=1:3
+    if best_features_2vsall{1,s_id}{2} > max
+        max = best_features_2vsall{1,s_id}{2};
+        s_index = s_id;
+    end
+end
+
+best_sensor_2vsall.index = s_index;
+best_sensor_2vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_2vsall.accuracy = max;
+
+%3 vs all
+max = 0;
+s_index = 1;
+for s_id=1:3
+    if best_features_3vsall{1,s_id}{2} > max
+        max = best_features_3vsall{1,s_id}{2};
+        s_index = s_id;
+    end
+end
+
+best_sensor_3vsall.index = s_index;
+best_sensor_3vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_3vsall.accuracy = max;
+
+%4 vs all
+max = 0;
+s_index = 1;
+for s_id=1:3
+    if best_features_4vsall{1,s_id}{2} > max
+        max = best_features_4vsall{1,s_id}{2};
+        s_index = s_id;
+    end
+end
+
+best_sensor_4vsall.index = s_index;
+best_sensor_4vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_4vsall.accuracy = max;
+
+
 
 save('activity_class_workspace.mat');
