@@ -91,8 +91,16 @@ for s_id=1:3
     end
 end
 
+j = 1;
+app = zeros(1,4);
+for i=1:total_features
+    if best_features_4cc{1,s_index}{1}(i) == 1
+        app(j) = i;
+        j = j+1;
+    end
+end
 best_sensor_4cc.index = s_index;
-best_sensor_4cc.features = best_features_4cc{1,s_index}{1};
+best_sensor_4cc.features = app;
 best_sensor_4cc.accuracy = max;
 
 
