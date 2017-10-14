@@ -75,3 +75,10 @@ features_selection_4cc_independent_sensors
 %% features selection for the one-against-all classifier (independent sensors)
 
 features_selection_onevsall_independent_sensors
+
+%% sugeno-type FIS using ANFIS - four class classifier
+% use the best sensor computed previously
+sugeno_4cc_independent_sensors
+
+
+

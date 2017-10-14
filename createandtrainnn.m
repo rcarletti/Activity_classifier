@@ -3,7 +3,7 @@ function [nns] = createandtrainnn(sensor_num,inputs,targets, nets_num)
 %sensor_num
     global C
 
-    train_iter = 5;
+    train_iter = 1;
     nns = cell(1,nets_num);
 
     for i=1:nets_num

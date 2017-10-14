@@ -18,7 +18,6 @@ function [nn] = getnetworkbyfeatures(features, sensor, nn_type)
         end
         features = app;
     end
-    disp(nn_type)
     for i = 1:size(C, 1)
         if isequal(C(i,:),features)
             if strcmp(nn_type,'4cc')

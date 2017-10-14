@@ -156,7 +156,7 @@ for s_id=1:3
 end
 
 best_sensor_2vsall.index = s_index;
-best_sensor_2vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_2vsall.features = best_features_2vsall{1,s_index}{1};
 best_sensor_2vsall.accuracy = max;
 
 %3 vs all
@@ -170,7 +170,7 @@ for s_id=1:3
 end
 
 best_sensor_3vsall.index = s_index;
-best_sensor_3vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_3vsall.features = best_features_3vsall{1,s_index}{1};
 best_sensor_3vsall.accuracy = max;
 
 %4 vs all
@@ -184,7 +184,7 @@ for s_id=1:3
 end
 
 best_sensor_4vsall.index = s_index;
-best_sensor_4vsall.features = best_features_1vsall{1,s_index}{1};
+best_sensor_4vsall.features = best_features_4vsall{1,s_index}{1};
 best_sensor_4vsall.accuracy = max;
 
 
