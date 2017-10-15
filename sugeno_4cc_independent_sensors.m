@@ -22,17 +22,50 @@ end
 
 a_v_matrix_perm = a_v_matrix(randperm(size(a_v_matrix,1)),:);
 
-%select checking data - 15% of the dataset - 6 rows of the matrix
+% select ANFIS data - 70%-30% split
 
-sugeno.fcc.checking_data = a_v_matrix_perm(1:6, 1:5);
+ntrn = floor(40*0.7);
+nchk = 40-ntrn;
 
-%select testing data - 15% of the dataset - 6 rows of the matrix
+sugeno.fcc.training_data = a_v_matrix_perm(1:ntrn, 1:5);
+sugeno.fcc.validation_data = a_v_matrix_perm(ntrn+1:40, 1:5);
 
-sugeno.fcc.testing_data = a_v_matrix_perm(7:12, 1:5);
+%% generate and train the sugeno FIS
 
-%select training data - 70% of the dataset - 28 rows of the matrix
+nmfs = 2;
+epochs = 150;
 
-sugeno.fcc.training_data = a_v_matrix_perm(13:40, 1:5);
+% generate initial FIS
+sugeno.fcc.genopt = genfisOptions('GridPartition');
+sugeno.fcc.genopt.NumMembershipFunctions = nmfs;
+sugeno.fcc.genopt.InputMembershipFunctionType = 'gbellmf';
 
-%% generate the sugeno FIS
+% set FIS options
+sugeno.fcc.fisopt = anfisOptions('EpochNumber', epochs, 'OptimizationMethod', 1, 'InitialFIS', ...
+    genfis(sugeno.fcc.training_data(:,1:4), sugeno.fcc.training_data(:,5), sugeno.fcc.genopt));
+sugeno.fcc.fisopt.DisplayErrorValues = 0;
+sugeno.fcc.fisopt.DisplayStepSize = 0;
+sugeno.fcc.fisopt.ValidationData = sugeno.fcc.validation_data;
 
+% run ANFIS
+[sugeno.fcc.fis, sugeno.fcc.train_err, ~, sugeno.fcc.check_fis, sugeno.fcc.check_err] = ...
+    anfis(sugeno.fcc.training_data, sugeno.fcc.fisopt);
+
+% compute fuzzy output values
+sugeno.fcc.training_out = evalfis(sugeno.fcc.training_data(:,1:4), sugeno.fcc.fis);
+sugeno.fcc.validation_out = evalfis(sugeno.fcc.validation_data(:,1:4), sugeno.fcc.fis);
+
+% plot output data
+figure;
+
+subplot(2,2,1);
+plot(1:ntrn, sugeno.fcc.training_data(:,5), '*r', 1:ntrn, sugeno.fcc.training_out(:,1), '*b');
+legend('Training Data', 'ANFIS Output');
+
+subplot(2,2,2);
+plot(1:nchk, sugeno.fcc.validation_data(:,5), '*r', 1:nchk, sugeno.fcc.validation_out(:,1), '*b');
+legend('Training Data', 'ANFIS Output');
+
+subplot(2,2,[3,4]);
+plot(1:epochs, sugeno.fcc.train_err, '.r', 1:epochs, sugeno.fcc.check_err, '*b');
+legend('Training error', 'Validation error');
