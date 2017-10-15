@@ -2,7 +2,7 @@
 
 %create the matrix with features for each couple activity-volunteer
 %the data are arranged in [feat1,feat2,feat3,feat4,activity,volunteer]
-
+    
 a_v_matrix = zeros(40,6);
 for a_id = 1:4
     for v_id = 1:10

@@ -72,6 +72,10 @@ end
 
 features_selection_4cc_independent_sensors
 
+%% features selection for the 4 class classifier (all sensors)
+
+features_selection_4cc_all_sensors
+
 %% features selection for the one-against-all classifier (independent sensors)
 
 features_selection_onevsall_independent_sensors
