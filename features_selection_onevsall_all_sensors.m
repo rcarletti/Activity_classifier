@@ -16,7 +16,7 @@ targets_onevsall_all{3} = [zeros(1,30), zeros(1,30), ones(1,30), zeros(1,30);
 targets_onevsall_all{4} = [zeros(1,30), zeros(1,30), zeros(1,30), ones(1,30);
                           ones(1,30), ones(1,30), ones(1,30), zeros(1,30)];
                       
-%% genetic algorithm
+%% set-up the genetic algorithm
 
 %this time we consider 33 features, 11 features for each sensor
 population_size = 100;
@@ -46,7 +46,7 @@ for i=1:4
     best_onevsall_all{i} = struct;
 end
 
-%% run genetic algoritm
+%% run the genetic algoritm
 
 for i=1:4
     best_onevsall_all{i}.features = ga(@(x) fitnessall(x,...

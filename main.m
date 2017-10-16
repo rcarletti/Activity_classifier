@@ -1,12 +1,11 @@
 load('data.mat');
 
 global chosen_features_num;
+global total_features;
 
 filtered_s = dsnew();
 normalized_s = dsnew();
 chosen_features_num = 4;
-
-global total_features;
 
 %% filter data
 
@@ -85,6 +84,8 @@ features_selection_onevsall_independent_sensors
 %% features selection for the one-against-all classifier (all sensors)
 
 features_selection_onevsall_all_sensors
+
+save('activity_class_workspace.mat');
 
 %% sugeno-type FIS using ANFIS - four class classifier
 % use the best sensor computed previously

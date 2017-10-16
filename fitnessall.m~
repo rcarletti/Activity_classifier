@@ -1,9 +1,10 @@
-function [conf] = fitnessall(features_set,targets,features_ds)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+function [conf] = fitnessall(features_set,targets,features_ds, type)
+%creates and trains a neural network and compute the confusion anf
+
     global chosen_features_num
     global total_features
-    global best_all
+    global best_all_4cc
+    global best_onevsall_all
     j = 1;
     features = zeros(1,4);
     for i=1:total_features * 3
@@ -13,7 +14,8 @@ function [conf] = fitnessall(features_set,targets,features_ds)
         end
     end
     
-    %build the inputs matrix
+    %build the inputs matrix, starting from the features set computed by
+    %the GA
     
     inputs = zeros(chosen_features_num, 120);
     
@@ -23,24 +25,40 @@ function [conf] = fitnessall(features_set,targets,features_ds)
                 inputs(f_id, ((a_id - 1) * 30 + v_id)) = ...
                     dsgetfeature(features_ds,...
                     mod(features(f_id), 11) + 1,...     %feature_index
-                    ceil(v_id/10),...                   &
+                    ceil(v_id/10),...                   %sensor_id
                     a_id,...
                     mod(v_id, 10) + 1);
             end
         end
     end
     
+    %create the nn
     net = patternnet(10);
     net.divideParam.trainRatio = 70/100;
     net.divideParam.valRatio = 15/100;
     net.divideParam.testRatio = 15/100;
     
-    [net,tr] = train(net,inputs,targets);
+    %train the nn five times
+    
+    for i = 1:5
+        [net,tr] = train(net,inputs,targets);
+    end
+    
     out = net(inputs);
     conf = confusion(targets, out);
-    best_all.net = net;
-    best_all.accuracy = 1 - conf;
-    best_all.tr = tr;
+    
+    %four class classifier
+    if strcmp(type, '4cc')
+        best_all_4cc.net = net;
+        best_all_4cc.accuracy = 1 - conf;
+        best_all_4cc.tr = tr;
+    else
+        %one versus all classifier
+        best_onevsall_all{str2num(type(1))}.net = net;
+        best_onevsall_all{str2num(type(1))}.tr = tr;
+        best_onevsall_all{str2num(type(1))}.accuracy = 1-conf;
+        
+    end
  
 end
 
