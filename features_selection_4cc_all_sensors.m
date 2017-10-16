@@ -1,4 +1,5 @@
 global total_features
+
 %% set up things for neural networks
 
 targets_all = [ones(1,30),  zeros(1,30), zeros(1,30), zeros(1,30);...
@@ -30,9 +31,9 @@ options.useParallel = 'true';
 intcon = (1:33);
 nonlinearcon = @(x)nonlcon(x);
 
-global best_all;
+
 best_all = struct;
 
-best_all.features = ga(@(x) fitnessall(x,targets_all), total_features * 3, [], [], [], [], ...
+best_all.features = ga(@(x) fitnessall(x,targets_all, features_ds), total_features * 3, [], [], [], [], ...
             zeros(1,33), ones(1,33), nonlinearcon, intcon, options);
 

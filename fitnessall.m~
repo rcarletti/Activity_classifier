@@ -23,7 +23,7 @@ function [conf] = fitnessall(features_set,targets,features_ds)
                 inputs(f_id, ((a_id - 1) * 30 + v_id)) = ...
                     dsgetfeature(features_ds,...
                     mod(features(f_id), 11) + 1,...     %feature_index
-                    ceil(v_id/10),...                   %sensor_id
+                    ceil(v_id/10),...                   &
                     a_id,...
                     mod(v_id, 10) + 1);
             end
@@ -35,9 +35,7 @@ function [conf] = fitnessall(features_set,targets,features_ds)
     net.divideParam.valRatio = 15/100;
     net.divideParam.testRatio = 15/100;
     
-    for i = 1:5
-        [net,tr] = train(net,inputs,targets);
-    end
+    [net,tr] = train(net,inputs,targets);
     out = net(inputs);
     conf = confusion(targets, out);
     best_all.net = net;
