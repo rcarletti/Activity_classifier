@@ -2,10 +2,10 @@ global total_features
 
 %% set up things for neural networks
 
-targets_all = [ones(1,30),  zeros(1,30), zeros(1,30), zeros(1,30);...
-               zeros(1,30), ones(1,30),  zeros(1,30), zeros(1,30);...
-               zeros(1,30), zeros(1,30), ones(1,30),  zeros(1,30);...
-               zeros(1,30), zeros(1,30), zeros(1,30), ones(1,30)];
+targets_4cc_all = [ones(1,30),  zeros(1,30), zeros(1,30), zeros(1,30);...
+                   zeros(1,30), ones(1,30),  zeros(1,30), zeros(1,30);...
+                   zeros(1,30), zeros(1,30), ones(1,30),  zeros(1,30);...
+                   zeros(1,30), zeros(1,30), zeros(1,30), ones(1,30)];
 
 %% genetic algorithm
 %this time we consider 33 features, 11 features for each sensor
@@ -31,9 +31,9 @@ options.useParallel = 'true';
 intcon = (1:33);
 nonlinearcon = @(x)nonlcon(x);
 
+global best_all_4cc;
+best_all_4cc = struct;
 
-best_all = struct;
-
-best_all.features = ga(@(x) fitnessall(x,targets_all, features_ds), total_features * 3, [], [], [], [], ...
+best_all_4cc.features = ga(@(x) fitnessall(x,targets_4cc_all, features_ds, '4cc'), total_features * 3, [], [], [], [], ...
             zeros(1,33), ones(1,33), nonlinearcon, intcon, options);
 

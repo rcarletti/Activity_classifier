@@ -1,9 +1,10 @@
-function [conf] = fitnessall(features_set,targets,features_ds)
+function [conf] = fitnessall(features_set,targets,features_ds, type)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
     global chosen_features_num
     global total_features
-    global best_all
+    global best_all_4cc
+    global best_onevsall_all
     j = 1;
     features = zeros(1,4);
     for i=1:total_features * 3
@@ -40,9 +41,16 @@ function [conf] = fitnessall(features_set,targets,features_ds)
     end
     out = net(inputs);
     conf = confusion(targets, out);
-    best_all.net = net;
-    best_all.accuracy = 1 - conf;
-    best_all.tr = tr;
+    if strcmp(type, '4cc')
+        best_all_4cc.net = net;
+        best_all_4cc.accuracy = 1 - conf;
+        best_all_4cc.tr = tr;
+    else
+        best_onevsall_all{str2num(type(1))}.net = net;
+        best_onevsall_all{str2num(type(1))}.tr = tr;
+        best_onevsall_all{str2num(type(1))}.accuracy = 1-conf;
+        
+    end
  
 end
 
