@@ -72,18 +72,22 @@ end
 %% features selection for the 4 class classifier (independent sensors)
 
 features_selection_4cc_independent_sensors
+disp('features selection four class classifier with independent sensors done')
 
 %% features selection for the 4 class classifier (all sensors)
 
 features_selection_4cc_all_sensors
+disp('features selection four class classifier with all sensors done')
 
 %% features selection for the one-against-all classifier (independent sensors)
 
 features_selection_onevsall_independent_sensors
+disp('features selection onevsall classifier with independent sensors done')
 
 %% features selection for the one-against-all classifier (all sensors)
 
 features_selection_onevsall_all_sensors
+disp('features selection onevsall classifier with all sensors done')
 
 save('activity_class_workspace.mat');
 

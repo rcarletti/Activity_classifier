@@ -21,7 +21,6 @@ targets_onevsall_all{4} = [zeros(1,30), zeros(1,30), zeros(1,30), ones(1,30);
 %this time we consider 33 features, 11 features for each sensor
 population_size = 100;
 population_all = zeros(100, total_features * 3);
-rng('shuffle');
 
 %generate random population (pop_size x total_features array, features set to 1 are
 %the chosen features for that individual
