@@ -3,6 +3,8 @@ load('data.mat');
 global chosen_features_num;
 global total_features;
 
+rng(123456);
+
 filtered_s = dsnew();
 normalized_s = dsnew();
 chosen_features_num = 4;
