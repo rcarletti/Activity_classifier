@@ -37,8 +37,8 @@ function [sugeno] = anfis_onevsall(best_sensor, act, features_ds, seed)
     ntrn = floor(40*0.7);
     nchk = 40-ntrn;
 
-    sugeno.fcc.training_data = a_v_matrix_perm(1:ntrn, 1:5);
-    sugeno.fcc.validation_data = a_v_matrix_perm(ntrn+1:40, 1:5);
+    sugeno.onevsall.training_data = a_v_matrix_perm(1:ntrn, 1:5);
+    sugeno.onevsall.validation_data = a_v_matrix_perm(ntrn+1:40, 1:5);
 
     % generate and train the sugeno FIS
 
@@ -46,38 +46,38 @@ function [sugeno] = anfis_onevsall(best_sensor, act, features_ds, seed)
     epochs = 150;
 
     % generate initial FIS
-    sugeno.fcc.genopt = genfisOptions('GridPartition');
-    sugeno.fcc.genopt.NumMembershipFunctions = nmfs;
-    sugeno.fcc.genopt.InputMembershipFunctionType = 'gbellmf';
+    sugeno.onevsall.genopt = genfisOptions('GridPartition');
+    sugeno.onevsall.genopt.NumMembershipFunctions = nmfs;
+    sugeno.onevsall.genopt.InputMembershipFunctionType = 'gbellmf';
 
     % set FIS options
-    sugeno.fcc.fisopt = anfisOptions('EpochNumber', epochs, 'OptimizationMethod', 1, 'InitialFIS', ...
-        genfis(sugeno.fcc.training_data(:,1:4), sugeno.fcc.training_data(:,5), sugeno.fcc.genopt));
-    sugeno.fcc.fisopt.DisplayErrorValues = 0;
-    sugeno.fcc.fisopt.DisplayStepSize = 0;
-    sugeno.fcc.fisopt.ValidationData = sugeno.fcc.validation_data;
+    sugeno.onevsall.fisopt = anfisOptions('EpochNumber', epochs, 'OptimizationMethod', 1, 'InitialFIS', ...
+        genfis(sugeno.onevsall.training_data(:,1:4), sugeno.onevsall.training_data(:,5), sugeno.onevsall.genopt));
+    sugeno.onevsall.fisopt.DisplayErrorValues = 0;
+    sugeno.onevsall.fisopt.DisplayStepSize = 0;
+    sugeno.onevsall.fisopt.ValidationData = sugeno.onevsall.validation_data;
 
     % run ANFIS
-    [sugeno.fcc.fis, sugeno.fcc.train_err, ~, sugeno.fcc.check_fis, sugeno.fcc.check_err] = ...
-        anfis(sugeno.fcc.training_data, sugeno.fcc.fisopt);
+    [sugeno.onevsall.fis, sugeno.onevsall.train_err, ~, sugeno.onevsall.check_fis, sugeno.onevsall.check_err] = ...
+        anfis(sugeno.onevsall.training_data, sugeno.onevsall.fisopt);
 
     % compute fuzzy output values
-    sugeno.fcc.training_out = evalfis(sugeno.fcc.training_data(:,1:4), sugeno.fcc.fis);
-    sugeno.fcc.validation_out = evalfis(sugeno.fcc.validation_data(:,1:4), sugeno.fcc.fis);
+    sugeno.onevsall.training_out = evalfis(sugeno.onevsall.training_data(:,1:4), sugeno.onevsall.fis);
+    sugeno.onevsall.validation_out = evalfis(sugeno.onevsall.validation_data(:,1:4), sugeno.onevsall.fis);
 
     % plot output data
     figure;
 
     subplot(2,2,1);
-    plot(1:ntrn, sugeno.fcc.training_data(:,5), '*r', 1:ntrn, sugeno.fcc.training_out(:,1), '*b');
+    plot(1:ntrn, sugeno.onevsall.training_data(:,5), '*r', 1:ntrn, sugeno.onevsall.training_out(:,1), '*b');
     legend('Training Data', 'ANFIS Output');
 
     subplot(2,2,2);
-    plot(1:nchk, sugeno.fcc.validation_data(:,5), '*r', 1:nchk, sugeno.fcc.validation_out(:,1), '*b');
+    plot(1:nchk, sugeno.onevsall.validation_data(:,5), '*r', 1:nchk, sugeno.onevsall.validation_out(:,1), '*b');
     legend('Training Data', 'ANFIS Output');
 
     subplot(2,2,[3,4]);
-    plot(1:epochs, sugeno.fcc.train_err, '.r', 1:epochs, sugeno.fcc.check_err, '*b');
+    plot(1:epochs, sugeno.onevsall.train_err, '.r', 1:epochs, sugeno.onevsall.check_err, '*b');
     legend('Training error', 'Validation error');
 end
 

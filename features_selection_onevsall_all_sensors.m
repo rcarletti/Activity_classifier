@@ -59,3 +59,19 @@ for i=1:4
             intcon, ...
             options);
 end
+
+%%
+
+for i=1:4
+    j = 1;
+    app = zeros(1,4);
+    for k=1:total_features * 3
+        if best_onevsall_all{1,i}.features(k) == 1
+            app(j) = k;
+            j = j+1;
+        end
+    end
+    
+    best_onevsall_all{1,i}.features = app
+        
+end

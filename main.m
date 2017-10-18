@@ -74,23 +74,22 @@ end
 %% features selection for the 4 class classifier (independent sensors)
 
 features_selection_4cc_independent_sensors
-disp('features selection four class classifier with independent sensors done')
+disp('-------------features selection four class classifier with independent sensors done-------------')
 
 %% features selection for the 4 class classifier (all sensors)
 
 features_selection_4cc_all_sensors
-disp('features selection four class classifier with all sensors done')
+disp('-------------features selection four class classifier with all sensors done-------------')
 
 %% features selection for the one-against-all classifier (independent sensors)
 
 features_selection_onevsall_independent_sensors
-disp('features selection onevsall classifier with independent sensors done')
+disp('-------------features selection onevsall classifier with independent sensors done-------------')
 
 %% features selection for the one-against-all classifier (all sensors)
 
 features_selection_onevsall_all_sensors
-disp('features selection onevsall classifier with all sensors done')
-
+disp('-------------features selection onevsall classifier with all sensors done-------------')
 
 %% sugeno-type FIS using ANFIS - four class classifier - independents sensors
 % use the best sensor computed previously
@@ -99,9 +98,13 @@ sugeno_4cc_independent_sensors
 %% sugeno-type FIS using ANFIS - four class classifier - all sensors
 sugeno_4cc_all_sensors
 
-%% sugeno-type FIS using ANFIS - one against all classifier
+%% sugeno-type FIS using ANFIS - one against all classifier - independent sensors
 % use the best sensor computed previously
 sugeno_onevsall_independent_sensors
+
+%% sugeno-type FIS using ANFIS - one against all classifier - all sensors
+% use the best sensor computed previously
+sugeno_onevsall_all_sensors
 
 save('activity_class_workspace.mat');
 
