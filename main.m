@@ -91,11 +91,18 @@ disp('features selection onevsall classifier with independent sensors done')
 features_selection_onevsall_all_sensors
 disp('features selection onevsall classifier with all sensors done')
 
-save('activity_class_workspace.mat');
 
-%% sugeno-type FIS using ANFIS - four class classifier
+%% sugeno-type FIS using ANFIS - four class classifier - independents sensors
 % use the best sensor computed previously
 sugeno_4cc_independent_sensors
 
+%% sugeno-type FIS using ANFIS - four class classifier - all sensors
+sugeno_4cc_all_sensors
+
+%% sugeno-type FIS using ANFIS - one against all classifier
+% use the best sensor computed previously
+sugeno_onevsall_independent_sensors
+
+save('activity_class_workspace.mat');
 
 

@@ -37,3 +37,16 @@ best_all_4cc = struct;
 best_all_4cc.features = ga(@(x) fitnessall(x,targets_4cc_all, features_ds, '4cc'), total_features * 3, [], [], [], [], ...
             zeros(1,33), ones(1,33), nonlinearcon, intcon, options);
 
+%%
+        
+j = 1;
+app = zeros(1,4);
+for i=1:total_features * 3
+    if best_all_4cc.features(i) == 1
+        app(j) = i;
+        j = j+1;
+    end
+end
+
+best_all_4cc.features = app;
+
