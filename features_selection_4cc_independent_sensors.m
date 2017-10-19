@@ -82,11 +82,11 @@ end
 %% choose the best sensor for the four class classifier
 
 
-max = 0;
+maxx = 0;
 s_index = 1;
 for s_id=1:3
-    if best_features_4cc{1,s_id}{2} > max
-        max = best_features_4cc{1,s_id}{2};
+    if best_features_4cc{1,s_id}{2} > maxx
+        maxx = best_features_4cc{1,s_id}{2};
         s_index = s_id;
     end
 end
@@ -101,6 +101,6 @@ for i=1:total_features
 end
 best_sensor_4cc.index = s_index;
 best_sensor_4cc.features = app;
-best_sensor_4cc.accuracy = max;
+best_sensor_4cc.accuracy = maxx;
 
 

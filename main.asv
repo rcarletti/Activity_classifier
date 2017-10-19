@@ -71,8 +71,6 @@ for s_id = 1:3
     end
 end
 
-features_names = ['min', 'max', 'mean', 'std_dev', 'peak2rms', 'peak2peak', 'rssq', 'occupied_band', 'power', 'meanfreq', 'bandpower'];
-
 %% features selection for the 4 class classifier (independent sensors)
 
 features_selection_4cc_independent_sensors
@@ -108,13 +106,11 @@ sugeno_onevsall_independent_sensors
 % use the best sensor computed previously
 sugeno_onevsall_all_sensors
 
-save('activity_class_workspace.mat');
-
 %% mamdani-type FIS - four class classifier - independent sensors
 % use the best sensor computed previously
 
 mamdani_4cc_independent_sensors
 
-
+save('activity_class_workspace.mat');
 
 
