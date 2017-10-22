@@ -1,228 +1,107 @@
-global neural_networks_1vsall;
-global neural_networks_2vsall;
-global neural_networks_3vsall;
-global neural_networks_4vsall;
+%% Perform best feature selection on a 1-vs-all classifier with independent sensors
 
+onevsall_ind = cell(1,4);
 
-%create targets 
-%class 1 vs all
-targets_onevsall{1} = [ones(1,10), zeros(1,10), zeros(1,10), zeros(1,10);
-                        zeros(1,10), ones(1,10), ones(1,10), ones(1,10)];
-               
-%class 2 vs all
-targets_onevsall{2} = [zeros(1,10), ones(1,10), zeros(1,10), zeros(1,10);
-                        ones(1,10), zeros(1,10), ones(1,10), ones(1,10)];
-
-%class 3 vs all
-targets_onevsall{3} = [zeros(1,10), zeros(1,10), ones(1,10), zeros(1,10);
-                        ones(1,10), ones(1,10), zeros(1,10), ones(1,10)];
-                  
-%class 4 vs all
-targets_onevsall{4} = [zeros(1,10), zeros(1,10), zeros(1,10), ones(1,10);
-                        ones(1,10), ones(1,10), ones(1,10), zeros(1,10)];
-                       
-
-%% create (n,k) neural networks for each sensor for each activity
-
-neural_networks_1vsall = cell(1,3);
-for s_id =1:3
-    neural_networks_1vsall{s_id} = createandtrainnn(s_id, inputs, ...
-                                targets_onevsall{1}, nets_num);
+%%
+for i = 1:4
+    [onevsall_ind{i}.best_sensor, onevsall_ind{i}.net] = ...
+        feature_selection(i, features_ds);
 end
 
-neural_networks_2vsall = cell(1,3);
-for s_id =1:3
-    neural_networks_2vsall{s_id} = createandtrainnn(s_id, inputs, ...
-                                targets_onevsall{2}, nets_num);
-end
+function [sensor, net] = feature_selection(act, features_ds)
+    global chosen_features_num;
+    global total_features;
 
-neural_networks_3vsall = cell(1,3);
-for s_id =1:3
-    neural_networks_3vsall{s_id} = createandtrainnn(s_id, inputs, ...
-                                targets_onevsall{3}, nets_num);
-end
+    % find (n,k) combinations of features
 
-neural_networks_4vsall = cell(1,3);
-for s_id =1:3
-    neural_networks_4vsall{s_id} = createandtrainnn(s_id, inputs, ...
-                                targets_onevsall{4}, nets_num);
-end
+    C = nchoosek((1:total_features), chosen_features_num);
+    nets_num = nchoosek(total_features, chosen_features_num);
 
-%% genetic algorithm
+    % create target and input vectors for neural network training
 
-population_size = 100;
-population = zeros(100, total_features);
-rng('shuffle');
+    targets = zeros(2, 40);
+    targets(2,:) = ones(1, 40);
+    targets(1, (1:10) + (act-1)*10) = ones(1,10);
+    targets(2, (1:10) + (act-1)*10) = zeros(1,10);
 
-%generate random population (pop_size x total_features array, features set to 1 are
-%the chosen features for that individual
-for i=1:population_size
-    feat_perm = randperm(total_features, chosen_features_num);
-    for f_id =1:chosen_features_num
-        population(i,feat_perm(f_id)) = 1;
+    inputs = cell(1,3);
+    for s_id = 1:3
+        inputs{s_id} = zeros(4, 40, size(C,1));
+
+        for t_id = 1:size(C,1)
+            for a_id = 1:4
+                for v_id = 1:10
+                    for f_id = 1:chosen_features_num
+                        inputs{s_id}(f_id, ((a_id-1) * 10) + v_id, t_id) = ...
+                            dsgetfeature(features_ds, C(t_id, f_id), s_id, a_id, v_id);
+                    end
+                end
+            end
+        end
     end
-end
 
-options = gaoptimset(@ga);
-options.PopulationType = 'doubleVector';
-options.InitialPopulation = population;
-options.useParallel = 'true';
+    % create (n,k) neural networks for each sensor and train them
+    
+    neural_networks = cell(1,3);
+    neural_networks{1} = createandtrainnn(1, inputs, targets, nets_num, C);
+    neural_networks{2} = createandtrainnn(2, inputs, targets, nets_num, C);
+    neural_networks{3} = createandtrainnn(3, inputs, targets, nets_num, C);
 
-intcon = (1:11);
-nonlinearcon = @(x)nonlcon(x);
+    %generate random population (pop_size x total_features array, features set to 1 are
+    %the chosen features for that individual
 
-best_features_1vsall = cell(1,3);
-for s_id=1:3
-    %get the best set of features for each sensor
-    best_features_1vsall{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id, '1vsall'), total_features, [], [], [], [], ...
+    population_size = 100;
+    population = zeros(100, total_features);
+    rng('shuffle');
+
+    for i=1:population_size
+        feat_perm = randperm(total_features, chosen_features_num);
+        for f_id =1:chosen_features_num
+            population(i,feat_perm(f_id)) = 1;
+        end
+    end
+
+    options = gaoptimset(@ga);
+    options.PopulationType = 'doubleVector';
+    options.InitialPopulation = population;
+    options.useParallel = 'true';
+
+    intcon = (1:11);
+    nonlinearcon = @(x)nonlcon(x);
+
+    % get the best set of features for each sensor
+
+    best_features = cell(1,3);
+    for s_id=1:3
+        best_features{s_id}.genes = ga(@(x) ...
+            fitnessfunction(neural_networks{s_id}, x), ...
+            total_features, [], [], [], [], ...
             zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
-end
-
-best_features_2vsall = cell(1,3);
-for s_id=1:3
-    %get the best set of features for each sensor
-    best_features_2vsall{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id, '2vsall'), total_features, [], [], [], [], ...
-            zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
-end
-
-best_features_3vsall = cell(1,3);
-for s_id=1:3
-    %get the best set of features for each sensor
-    best_features_3vsall{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id, '3vsall'), total_features, [], [], [], [], ...
-            zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
-end
-
-best_features_4vsall = cell(1,3);
-for s_id=1:3
-    %get the best set of features for each sensor
-    best_features_4vsall{1,s_id}{1} = ga(@(x) fitnessfunction(x, s_id, '4vsall'), total_features, [], [], [], [], ...
-            zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
-end
-
-%% compute accuracy for each sensor for each classifier
-
-%1 vs all
-for s_id=1:3
-    feat = best_features_1vsall{1,s_id}{1};
-    net = getnetworkbyfeatures(feat, s_id,'1vsall');
-    best_features_1vsall{1,s_id}{2} = 1-net.conf;
-end
-
-%2 vs all
-for s_id=1:3
-    feat = best_features_2vsall{1,s_id}{1};
-    net = getnetworkbyfeatures(feat, s_id,'2vsall');
-    best_features_2vsall{1,s_id}{2} = 1-net.conf;
-end
-
-%3 vs all
-for s_id=1:3
-    feat = best_features_3vsall{1,s_id}{1};
-    net = getnetworkbyfeatures(feat, s_id,'3vsall');
-    best_features_3vsall{1,s_id}{2} = 1-net.conf;
-end
-
-%4 vs all
-for s_id=1:3
-    feat = best_features_4vsall{1,s_id}{1};
-    net = getnetworkbyfeatures(feat, s_id,'4vsall');
-    best_features_4vsall{1,s_id}{2} = 1-net.conf;
-end
-
-%% choose the best sensor for each activity 
-
-%1 vs all
-maxx = 0;
-s_index = 1;
-for s_id=1:3
-    if best_features_1vsall{1,s_id}{2} > maxx
-        maxx = best_features_1vsall{1,s_id}{2};
-        s_index = s_id;
+        best_features{s_id}.features = genes2feat(best_features{s_id}.genes);
     end
-end
 
-j = 1;
-app = zeros(1,4);
-for i=1:total_features
-    if best_features_1vsall{1,s_index}{1}(i) == 1
-        app(j) = i;
-        j = j+1;
+    % compute accuracy for each sensor
+
+    for s_id=1:3
+        net = getnetworkbyfeatures(neural_networks{s_id}, best_features{s_id}.features);
+        best_features{s_id}.accuracy = 1 - net.conf;
     end
-end
 
-best_sensor_1vsall.index = s_index;
-best_sensor_1vsall.features = app;
-best_sensor_1vsall.accuracy = maxx;
+    % choose the best sensor for the classifier
 
-%2 vs all
-maxx = 0;
-s_index = 1;
-for s_id=1:3
-    if best_features_2vsall{1,s_id}{2} > maxx
-        maxx = best_features_2vsall{1,s_id}{2};
-        s_index = s_id;
+    max_acc = 0;
+    best_s_id = 1;
+
+    for s_id=1:3
+        if best_features{s_id}.accuracy > max_acc
+            max_acc = best_features{s_id}.accuracy;
+            best_s_id = s_id;
+        end
     end
+
+    sensor.index = best_s_id;
+    sensor.features = best_features{best_s_id}.features;
+    sensor.accuracy = max_acc;
+    
+    net = getnetworkbyfeatures(neural_networks{best_s_id}, sensor.features);
 end
-
-j = 1;
-app = zeros(1,4);
-for i=1:total_features
-    if best_features_2vsall{1,s_index}{1}(i) == 1
-        app(j) = i;
-        j = j+1;
-    end
-end
-
-best_sensor_2vsall.index = s_index;
-best_sensor_2vsall.features = app;
-best_sensor_2vsall.accuracy = maxx;
-
-%3 vs all
-maxx = 0;
-s_index = 1;
-for s_id=1:3
-    if best_features_3vsall{1,s_id}{2} > maxx
-        maxx = best_features_3vsall{1,s_id}{2};
-        s_index = s_id;
-    end
-end
-
-j = 1;
-app = zeros(1,4);
-for i=1:total_features
-    if best_features_3vsall{1,s_index}{1}(i) == 1
-        app(j) = i;
-        j = j+1;
-    end
-end
-
-best_sensor_3vsall.index = s_index;
-best_sensor_3vsall.features = app;
-best_sensor_3vsall.accuracy = maxx;
-
-%4 vs all
-maxx = 0;
-s_index = 1;
-for s_id=1:3
-    if best_features_4vsall{1,s_id}{2} > maxx
-        maxx = best_features_4vsall{1,s_id}{2};
-        s_index = s_id;
-    end
-end
-
-j = 1;
-app = zeros(1,4);
-for i=1:total_features
-    if best_features_4vsall{1,s_index}{1}(i) == 1
-        app(j) = i;
-        j = j+1;
-    end
-end
-
-best_sensor_4vsall.index = s_index;
-best_sensor_4vsall.features = app;
-best_sensor_4vsall.accuracy = maxx;
-
-
-
-

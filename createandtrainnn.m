@@ -1,25 +1,25 @@
-function [nns] = createandtrainnn(sensor_num,inputs,targets, nets_num)
+function [nns] = createandtrainnn(sensor_num, inputs, targets, nets_num, C)
 %creates and trains nets_num neural networks with inputs and targets from sensor
 %sensor_num
-    global C
 
     train_iter = 1;
     nns = cell(1,nets_num);
 
-    for i=1:nets_num
+    parfor i=1:nets_num
         nns{i} = {};
         
         nns{i}.net = patternnet(10);
         nns{i}.net.divideParam.trainRatio = 70/100;
         nns{i}.net.divideParam.valRatio = 15/100;
         nns{i}.net.divideParam.testRatio = 15/100;
+        nns{i}.net.trainParam.showWindow = false;
 
         nns{i}.inputs = inputs{sensor_num}(:,:,i);
         nns{i}.targets = targets;
         nns{i}.features = C(i,:);
         
         for j=1:train_iter
-            nns{i}.net = train(nns{i}.net, ...
+            [nns{i}.net, nns{i}.tr] = train(nns{i}.net, ...
                 nns{i}.inputs, nns{i}.targets);
         end
 

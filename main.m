@@ -3,75 +3,17 @@ load('data.mat');
 global chosen_features_num;
 global total_features;
 
-rng(123456);
-
-filtered_s = dsnew();
-normalized_s = dsnew();
 chosen_features_num = 4;
 
-%% filter data
+%% filter and normalize data
 
-for s_id = 1:3                          %for each sensor
-    for a_id = 1:4                      %for each actovity
-        for v_id  = 1:10                %for each volunteer
-            fs = sgolayfilt(dsget(data,s_id,a_id,v_id),4,21);
-            filtered_s = dsput(filtered_s,fs,s_id,a_id,v_id);
-        end
-    end
-end
-
-%plot(dsget(data,1,1,1));
-%hold on 
-%plot(dsget(filtered_s,1,1,1));
-
-%% subtract mean value
-
-for s_id = 1:3
-    for a_id = 1:4
-        for v_id = 1:10
-            ds = detrend(dsget(filtered_s, s_id, a_id, v_id),'constant');
-            filtered_s = dsput(filtered_s,ds, s_id,a_id,v_id);
-        end
-    end
-end
-
-%plot(dsget(filtered_s,1,1,1));
-
-
-%% z-normalization
-
-for s_id = 1:3
-    for a_id = 1:4
-        for v_id = 1:10
-            s = dsget(filtered_s,s_id,a_id,v_id);
-            %compute standard deviation for each signal
-            standard_dev = std(s);
-            %divide the signal for the standard deviation
-            normalized_signal = s/standard_dev;
-            normalized_s = dsput(normalized_s, normalized_signal, s_id,...
-                a_id, v_id);     
-        end
-    end
-end
-
-%plot(dsget(normalized_s,1,1,1));
+filtered_s = filter_data(data);
+%filtered_s = remove_mean(filtered_s);
+%filtered_s = normalize_data(filtered_s);
 
 %% extract features for each sensor 
-features_ds = dsnew();
 
-for s_id = 1:3
-    for a_id = 1:4
-        for v_id = 1:10
-            feat_t = getfeatures(dsget(normalized_s,s_id,a_id,v_id), 't');
-            feat_f = getfeatures(dsget(normalized_s,s_id,a_id,v_id), 'f');
-            feat = [feat_t, feat_f];
-            total_features = length(feat);
-            features_ds = dsputfeatures(features_ds,feat,s_id,a_id,v_id);
-        end
-    end
-end
-
-features_names = ['min', 'max', 'mean', 'std_dev', 'peak2rms', 'peak2peak', 'rssq', 'occupied_band', 'power', 'meanfreq', 'bandpower'];
+[features_ds, features_names, total_features] = extract_features(filtered_s);
 
 %% features selection for the 4 class classifier (independent sensors)
 
@@ -115,6 +57,69 @@ save('activity_class_workspace.mat');
 
 mamdani_4cc_independent_sensors
 
+%% Helper functions
 
+function [filtered_s] = filter_data(data)
+% Apply Savitzky-Golay filter to input data
+    filtered_s = dsnew();
 
+    for s_id = 1:3           %for each sensor
+        for a_id = 1:4       %for each actovity
+            for v_id  = 1:10 %for each volunteer
+                fs = sgolayfilt(dsget(data, s_id, a_id, v_id), 4, 21);
+                filtered_s = dsput(filtered_s, fs, s_id, a_id, v_id);
+            end
+        end
+    end
+end
 
+function [filtered_s] = remove_mean(filtered_s)
+% Remove mean from filtered dataset
+    for s_id = 1:3
+        for a_id = 1:4
+            for v_id = 1:10
+                ds = detrend(dsget(filtered_s, s_id, a_id, v_id), 'constant');
+                filtered_s = dsput(filtered_s, ds, s_id, a_id, v_id);
+            end
+        end
+    end
+end
+
+function [filtered_s] = normalize_data(filtered_s)
+% Normalize filtered dataset
+    for s_id = 1:3
+        for a_id = 1:4
+            for v_id = 1:10
+                s = dsget(filtered_s, s_id, a_id, v_id);
+                
+                %compute standard deviation for each signal
+                standard_dev = std(s);
+                
+                %divide the signal for the standard deviation
+                normalized_signal = s / standard_dev;
+                
+                filtered_s = dsput(filtered_s, normalized_signal, s_id, a_id, v_id);     
+            end
+        end
+    end
+end
+
+function [features_ds, features_names, total_features] = extract_features(filtered_ds)
+% Extract features from every signal
+    features_ds = dsnew();
+    
+    for s_id = 1:3
+        for a_id = 1:4
+            for v_id = 1:10
+                feat_t = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 't');
+                feat_f = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 'f');
+                feat = [feat_t, feat_f];
+                total_features = length(feat);
+                features_ds = dsputfeatures(features_ds, feat, s_id, a_id, v_id);
+            end
+        end
+    end
+
+    features_names = ["min", "max", "mean", "std_dev","peak2rms", "peak2peak", ...
+        "rssq", "occupied_band", "power", "meanfreq", "bandpower"];
+end

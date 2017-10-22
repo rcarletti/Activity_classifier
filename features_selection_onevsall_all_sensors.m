@@ -1,23 +1,15 @@
-global total_features
+%% create targets
+Z = zeros(1,30);
+O = ones(1,30);
 
-%% set up things for neural networks
-
-targets_onevsall_all = cell(1,4);
-
-targets_onevsall_all{1} = [ones(1,30), zeros(1,30), zeros(1,30), zeros(1,30);
-                          zeros(1,30), ones(1,30), ones(1,30), ones(1,30)];
-                      
-targets_onevsall_all{2} = [zeros(1,30), ones(1,30), zeros(1,30), zeros(1,30);
-                          ones(1,30), zeros(1,30), ones(1,30), ones(1,30)];
-                      
-targets_onevsall_all{3} = [zeros(1,30), zeros(1,30), ones(1,30), zeros(1,30);
-                          ones(1,30), ones(1,30), zeros(1,30), ones(1,30)];
-                      
-targets_onevsall_all{4} = [zeros(1,30), zeros(1,30), zeros(1,30), ones(1,30);
-                          ones(1,30), ones(1,30), ones(1,30), zeros(1,30)];
-                      
+targets_onevsall{1} = [O Z Z Z; Z O O O];
+targets_onevsall{2} = [Z O Z Z; O Z O O];
+targets_onevsall{3} = [Z Z O Z; O O Z O];
+targets_onevsall{4} = [Z Z Z O; O O O Z];
+  
 %% set-up the genetic algorithm
 
+function [sensor, feats, nets] = retrievebestfeatures(class_num, targets, inputs, features_ds)
 %this time we consider 33 features, 11 features for each sensor
 population_size = 100;
 population_all = zeros(100, total_features * 3);

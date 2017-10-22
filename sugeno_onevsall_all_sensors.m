@@ -2,10 +2,10 @@
 
 seed = floor(rand * 10000);
 
-sugeno_1vsall.onevsall_all = anfis_onevsall_all(best_onevsall_all{1,1}, 1, features_ds, seed);
-sugeno_2vsall.onevsall_all = anfis_onevsall_all(best_onevsall_all{1,2}, 2, features_ds, seed);
-sugeno_3vsall.onevsall_all = anfis_onevsall_all(best_onevsall_all{1,3}, 3, features_ds, seed);
-sugeno_4vsall.onevsall_all = anfis_onevsall_all(best_onevsall_all{1,4}, 4, features_ds, seed);
+sugeno_vsall = cell(1,4);
+for i = 1:4
+    sugeno_vsall{i}.all = anfis_onevsall_all(best_onevsall_all{i}, i, features_ds, seed);
+end
 
 %% Local functions
 
