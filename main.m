@@ -7,9 +7,15 @@ chosen_features_num = 4;
 
 %% filter and normalize data
 
-filtered_s = filter_data(data);
-%filtered_s = remove_mean(filtered_s);
-%filtered_s = normalize_data(filtered_s);
+plot(dsget(data,2,1,1));
+hold on;
+[filtered_s, Hd] = filter_data(data);
+plot(dsget(filtered_s,2,1,1));
+
+filtered_s = remove_mean(filtered_s);
+plot(dsget(filtered_s,2,1,1));
+filtered_s = normalize_data(filtered_s);
+plot(dsget(filtered_s,2,1,1));
 
 %% extract features for each sensor 
 
@@ -59,15 +65,18 @@ mamdani_4cc_independent_sensors
 
 %% Helper functions
 
-function [filtered_s] = filter_data(data)
+function [filtered_s, hd] = filter_data(data)
 % Apply Savitzky-Golay filter to input data
     filtered_s = dsnew();
 
     for s_id = 1:3           %for each sensor
         for a_id = 1:4       %for each actovity
             for v_id  = 1:10 %for each volunteer
-                fs = sgolayfilt(dsget(data, s_id, a_id, v_id), 4, 21);
-                filtered_s = dsput(filtered_s, fs, s_id, a_id, v_id);
+                b = fir1(400,.4);
+                hd = dfilt.dffir(b);
+                y1 = filter(hd,dsget(data, s_id, a_id, v_id));
+                zf = hd.states;
+                filtered_s = dsput(filtered_s, y1, s_id, a_id, v_id);
             end
         end
     end
@@ -120,6 +129,6 @@ function [features_ds, features_names, total_features] = extract_features(filter
         end
     end
 
-    features_names = ["min", "max", "mean", "std_dev","peak2rms", "peak2peak", ...
+    features_names = ["min", "max", "std_dev", "peak2rms", "peak2peak", ...
         "rssq", "occupied_band", "power", "meanfreq", "bandpower"];
 end

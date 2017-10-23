@@ -5,14 +5,14 @@ function [features] = getfeatures(signal, domain)
     sampling_frequency = 1/sampling_time;
 
     if strcmp(domain, 't')                  %time domain
-        features = cell(1,7);
+        features = cell(1,6);
         features{1} = min(signal);          %min
         features{2} = max(signal);          %max
-        features{3} = mean(signal);         %mean
-        features{4} = std(signal);          %standard deviation
-        features{5} = peak2rms(signal);     %Peak-magnitude-to-RMS ratio
-        features{6} = peak2peak(signal);    %Maximum-to-minimum difference
-        features{7} = rssq(signal);         %Root-Sum-of-Squares of the signal
+        %features{3} = mean(signal);         %mean
+        features{3} = std(signal);          %standard deviation
+        features{4} = peak2rms(signal);     %Peak-magnitude-to-RMS ratio
+        features{5} = peak2peak(signal);    %Maximum-to-minimum difference
+        features{6} = rssq(signal);         %Root-Sum-of-Squares of the signal
     end
 
     if strcmp(domain, 'f')

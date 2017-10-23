@@ -3,17 +3,11 @@ function [conf] = fitnessall(features_set,targets,features_ds, type)
 %to minimize the confusion
 
     global chosen_features_num
+    global onevsall_all;
     global total_features
-    global best_all_4cc
-    global best_onevsall_all
-    j = 1;
-    features = zeros(1,4);
-    for i=1:total_features * 3
-        if features_set(i) == 1
-            features(j) = i;
-            j = j+1;
-        end
-    end
+    global fcc_all;
+    
+    features = genes2feat(features_set);
     
     %build the inputs matrix, starting from the features set computed by
     %the GA
@@ -25,8 +19,8 @@ function [conf] = fitnessall(features_set,targets,features_ds, type)
             for f_id = 1:chosen_features_num
                 inputs(f_id, ((a_id - 1) * 30 + v_id)) = ...
                     dsgetfeature(features_ds,...
-                    mod(features(f_id), 11) + 1,...     %feature_index
-                    ceil(v_id/10),...                   %sensor_id
+                    mod(features(f_id), total_features) + 1,...     %feature_index
+                    ceil(v_id/10),...                               %sensor_id
                     a_id,...
                     mod(v_id, 10) + 1);
             end
@@ -39,24 +33,21 @@ function [conf] = fitnessall(features_set,targets,features_ds, type)
     net.divideParam.valRatio = 15/100;
     net.divideParam.testRatio = 15/100;
     
-    %train the nn five times
-    for i = 1:5
-        [net,tr] = train(net,inputs,targets);
-    end
+    [net,tr] = train(net,inputs,targets);
     
     out = net(inputs);
     conf = confusion(targets, out);
     
     %four class classifier
     if strcmp(type, '4cc')
-        best_all_4cc.net = net;
-        best_all_4cc.accuracy = 1 - conf;
-        best_all_4cc.tr = tr;
+        fcc_all.tr = tr;
+        fcc_all.accuracy = 1 - conf;
+        fcc_all.net = net;
     else
         %one versus all classifier
-        best_onevsall_all{str2num(type(1))}.net = net;
-        best_onevsall_all{str2num(type(1))}.tr = tr;
-        best_onevsall_all{str2num(type(1))}.accuracy = 1-conf;
+        onevsall_all{str2double(type(1))}.net = net;
+        onevsall_all{str2double(type(1))}.tr = tr;
+        onevsall_all{str2double(type(1))}.accuracy = 1-conf;
         
     end
  

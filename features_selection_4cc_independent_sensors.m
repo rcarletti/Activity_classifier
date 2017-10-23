@@ -62,7 +62,7 @@ function [sensor, net] = feature_selection(features_ds)
     options.InitialPopulation = population;
     options.useParallel = 'true';
 
-    intcon = (1:11);
+    intcon = (1:total_features);
     nonlinearcon = @(x)nonlcon(x);
 
     % get the best set of features for each sensor
@@ -72,7 +72,7 @@ function [sensor, net] = feature_selection(features_ds)
         best_features{s_id}.genes = ga(@(x) ...
             fitnessfunction(neural_networks{s_id}, x), ...
             total_features, [], [], [], [], ...
-            zeros(1,11), ones(1,11), nonlinearcon, intcon, options);
+            zeros(1,total_features), ones(1,total_features), nonlinearcon, intcon, options);
         best_features{s_id}.features = genes2feat(best_features{s_id}.genes);
     end
 
