@@ -40,9 +40,9 @@ function [conf] = fitnessall(features_set,targets,features_ds, type)
     
     %four class classifier
     if strcmp(type, '4cc')
-        fcc_all.tr = tr;
-        fcc_all.accuracy = 1 - conf;
-        fcc_all.net = net;
+        fcc_all.net.tr = tr;
+        fcc_all.net.accuracy = 1 - conf;
+        fcc_all.net.net = net;
     else
         %one versus all classifier
         onevsall_all{str2double(type(1))}.net = net;

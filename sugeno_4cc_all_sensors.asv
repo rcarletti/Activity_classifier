@@ -24,9 +24,9 @@ function [sugeno, input] = perform_sugeno(features, features_ds)
     end
     
     %shuffle columns
-    input_perm = input(randperm(size(input,1)),:);
+    input = input(randperm(size(input,1)),:);
     
-    % select ANFIS data - 70%-30% split
+     % select ANFIS data - 70%-30% split
 
     ntrn = floor(40*0.7);
     nchk = 40-ntrn;
@@ -51,7 +51,7 @@ function [sugeno, input] = perform_sugeno(features, features_ds)
         genfis(sugeno.training_data(:,1:4), sugeno.training_data(:,5), sugeno.genopt));
     sugeno.fisopt.DisplayErrorValues = 0;
     sugeno.fisopt.DisplayStepSize = 0;
-    sugeno.fisopt.ValidationData = sugeno.validation_data;
+    sugeno.fisopt.ValidationData = sugeno.fcc.validation_data;
 
     % run ANFIS
     [sugeno.fis, sugeno.train_err, ~, sugeno.check_fis, sugeno.check_err] = ...

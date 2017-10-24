@@ -2,6 +2,7 @@ global fcc_all;
 global onevsall_all;
 
 fcc_all = struct;
+fcc_all.net = struct;
 
 retrievebestfeatures(features_ds);
 
@@ -43,6 +44,6 @@ function [] = retrievebestfeatures(features_ds)
     feats = ga(@(x) fitnessall(x,targets, features_ds, '4cc'), total_features * 3, [], [], [], [], ...
             zeros(1,total_features * 3), ones(1,total_features * 3), nonlinearcon, intcon, options);
         
-    fcc_all.features = genes2feat(feats);
+    fcc_all.net.features = genes2feat(feats);
     
 end
