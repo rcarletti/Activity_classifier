@@ -2,7 +2,6 @@
 
 onevsall_ind = cell(1,4);
 
-%%
 for i = 1:4
     [onevsall_ind{i}.best_sensor, onevsall_ind{i}.net] = ...
         feature_selection(i, features_ds);

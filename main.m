@@ -56,8 +56,6 @@ sugeno_onevsall_independent_sensors
 % use the best sensor computed previously
 sugeno_onevsall_all_sensors
 
-save('activity_class_workspace.mat');
-
 %% mamdani-type FIS - four class classifier - independent sensors
 % use the best sensor computed previously
 

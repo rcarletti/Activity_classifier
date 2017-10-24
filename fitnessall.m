@@ -45,10 +45,9 @@ function [conf] = fitnessall(features_set,targets,features_ds, type)
         fcc_all.net.net = net;
     else
         %one versus all classifier
-        onevsall_all{str2double(type(1))}.net = net;
-        onevsall_all{str2double(type(1))}.tr = tr;
-        onevsall_all{str2double(type(1))}.accuracy = 1-conf;
-        
+        onevsall_all{str2double(type(1))}.net.tr = tr;
+        onevsall_all{str2double(type(1))}.net.accuracy = 1-conf;
+        onevsall_all{str2double(type(1))}.net.net = net;
     end
  
 end

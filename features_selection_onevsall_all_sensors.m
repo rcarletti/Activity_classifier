@@ -2,13 +2,12 @@
 global onevsall_all;
 for i = 1:4
     onevsall_all{i} = struct;
+    onevsall_all{i}.net = struct;
 end
 
 %% retrieve best features and sensor for each classifier
 
-
-    retrievebestfeatures(i,features_ds);
-
+retrievebestfeatures(i,features_ds);
 
 function [] = retrievebestfeatures(act, features_ds)
     
@@ -62,6 +61,6 @@ function [] = retrievebestfeatures(act, features_ds)
     disp(strcat('-------end of class n.', num2str(i)));
     end
     
-    onevsall_all{act}.features = genes2feat(feats);
+    onevsall_all{act}.net.features = genes2feat(feats);
 
 end
