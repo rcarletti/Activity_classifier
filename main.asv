@@ -7,7 +7,7 @@ chosen_features_num = 4;
 
 %% filter and normalize data
 
-%plot(dsgetdata(data,2,1,1));
+
 %hold on;
 %create one dataset for each time interval [164s,82s,41s]
 data_raw = cell(1,3);
@@ -20,23 +20,25 @@ end
 filtered_s = cell(1,3);
 for time_interval = [1,2,4]
         filtered_s{time_interval} = dsnew(time_interval);
+        %plot(dsget(data_raw,2,1,1,1));
+        %hold on
         [filtered_s, Hd] = filter_data(filtered_s,data_raw, time_interval);
+        %plot(dsget(filtered_s,2,1,1,1));
         filtered_s = remove_mean(filtered_s, time_interval);
+        %plot(dsget(filtered_s,2,1,1,1));
         filtered_s = normalize_data(filtered_s, time_interval);
+        %plot(dsget(filtered_s,2,1,1,1));
 end
 
 
+%% extract features for each sensor for each time interval
 
-%plot(dsget(filtered_s,2,1,1));
+features_ds = cell(1,3);
+for time_interval = [1,2,4]
+        features_ds{time_interval} = dsnew(time_interval);
+        [features_ds, features_names, total_features] = extract_features(filtered_s, time_interval);
+end
 
-%plot(dsget(filtered_s,2,1,1));
-
-%plot(dsget(filtered_s,2,1,1));
-
-%% create signals for different time-intervals
-%% extract features for each sensor 
-
-[features_ds, features_names, total_features] = extract_features(filtered_s);
 
 %% features selection for the 4 class classifier (independent sensors)
 
@@ -103,7 +105,7 @@ function [filtered_s] = remove_mean(filtered_s, time_interval)
 % Remove mean from filtered dataset
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:10
+            for v_id = 1:(10 * time_interval)
                 ds = detrend(dsget(filtered_s, s_id, a_id, v_id, time_interval), 'constant');
                 filtered_s = dsput(filtered_s, ds, s_id, a_id, v_id,time_interval);
             end
@@ -115,7 +117,7 @@ function [filtered_s] = normalize_data(filtered_s, time_interval)
 % Normalize filtered dataset
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:10
+            for v_id = 1:(10 * time_interval)
                 s = dsget(filtered_s, s_id, a_id, v_id, time_interval);
                 
                 %compute standard deviation for each signal
@@ -124,24 +126,23 @@ function [filtered_s] = normalize_data(filtered_s, time_interval)
                 %divide the signal for the standard deviation
                 normalized_signal = s / standard_dev;
                 
-                filtered_s = dsput(filtered_s, normalized_signal, s_id, a_id, v_id);     
+                filtered_s = dsput(filtered_s, normalized_signal, s_id, a_id, v_id, time_interval);     
             end
         end
     end
 end
 
-function [features_ds, features_names, total_features] = extract_features(filtered_ds)
+function [features_ds, features_names, total_features] = extract_features(filtered_ds, time_interval)
 % Extract features from every signal
-    features_ds = dsnew();
     
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:10
-                feat_t = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 't');
-                feat_f = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 'f');
+            for v_id = 1:(10 * time_interval)
+                feat_t = getfeatures(dsget(filtered_ds, s_id, a_id, v_id, time_interval), 't');
+                feat_f = getfeatures(dsget(filtered_ds, s_id, a_id, v_id, time_interval), 'f');
                 feat = [feat_t, feat_f];
                 total_features = length(feat);
-                features_ds = dsputfeatures(features_ds, feat, s_id, a_id, v_id);
+                features_ds = dsputfeatures(features_ds, feat, s_id, a_id, v_id, time_interval);
             end
         end
     end

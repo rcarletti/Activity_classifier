@@ -30,10 +30,14 @@ for time_interval = [1,2,4]
         %plot(dsget(filtered_s,2,1,1,1));
 end
 
-%% create signals for different time-intervals
-%% extract features for each sensor 
 
-[features_ds, features_names, total_features] = extract_features(filtered_s);
+%% extract features for each sensor for each time interval
+
+features_ds = cell(1,3);
+for time_interval = [1,2,4]
+        features_ds{time_interval} = dsnew(time_interval);
+        [features_ds, features_names, total_features] = extract_features(filtered_s,features_ds, time_interval);
+end
 
 %% features selection for the 4 class classifier (independent sensors)
 
@@ -127,18 +131,17 @@ function [filtered_s] = normalize_data(filtered_s, time_interval)
     end
 end
 
-function [features_ds, features_names, total_features] = extract_features(filtered_ds)
+function [features_ds, features_names, total_features] = extract_features(filtered_ds,features_ds, time_interval)
 % Extract features from every signal
-    features_ds = dsnew();
     
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:10
-                feat_t = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 't');
-                feat_f = getfeatures(dsget(filtered_ds, s_id, a_id, v_id), 'f');
+            for v_id = 1:(10 * time_interval)
+                feat_t = getfeatures(dsget(filtered_ds, s_id, a_id, v_id, time_interval), 't');
+                feat_f = getfeatures(dsget(filtered_ds, s_id, a_id, v_id, time_interval), 'f');
                 feat = [feat_t, feat_f];
                 total_features = length(feat);
-                features_ds = dsputfeatures(features_ds, feat, s_id, a_id, v_id);
+                features_ds = dsputfeatures(features_ds, feat, s_id, a_id, v_id, time_interval);
             end
         end
     end
@@ -146,6 +149,8 @@ function [features_ds, features_names, total_features] = extract_features(filter
     features_names = ["min", "max", "std_dev", "peak2rms", "peak2peak", ...
         "rssq", "occupied_band", "power", "meanfreq", "bandpower"];
 end
+
+
 
 
 function [data_raw] = filldata(data, data_raw, time_interval)

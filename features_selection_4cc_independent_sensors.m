@@ -1,6 +1,12 @@
 %% Perform best feature selection on a 4-class classifier with independent sensors
 
-fcc_ind = struct;
+%create a structure for each time interval
+fcc_ind = cell(1,4);
+for time_interval = [1,2,4]
+    fcc_ind{time_interval} = struct;
+end
+
+%%
 
 [fcc_ind.best_sensor, fcc_ind.net] = feature_selection(features_ds);
 
