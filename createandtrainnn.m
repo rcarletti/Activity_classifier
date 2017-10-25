@@ -8,7 +8,7 @@ function [nns] = createandtrainnn(sensor_num, inputs, targets, nets_num, C)
     parfor i=1:nets_num
         nns{i} = {};
         
-        nns{i}.net = patternnet(7);
+        nns{i}.net = patternnet(10);
         nns{i}.net.divideParam.trainRatio = 70/100;
         nns{i}.net.divideParam.valRatio = 15/100;
         nns{i}.net.divideParam.testRatio = 15/100;
