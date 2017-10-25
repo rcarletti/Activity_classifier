@@ -7,7 +7,7 @@ chosen_features_num = 4;
 
 %% filter and normalize data
 
-
+%plot(dsgetdata(data,2,1,1));
 %hold on;
 %create one dataset for each time interval [164s,82s,41s]
 data_raw = cell(1,3);
@@ -20,15 +20,18 @@ end
 filtered_s = cell(1,3);
 for time_interval = [1,2,4]
         filtered_s{time_interval} = dsnew(time_interval);
-        %plot(dsget(data_raw,2,1,1,1));
-        %hold on
         [filtered_s, Hd] = filter_data(filtered_s,data_raw, time_interval);
-        %plot(dsget(filtered_s,2,1,1,1));
         filtered_s = remove_mean(filtered_s, time_interval);
-        %plot(dsget(filtered_s,2,1,1,1));
         filtered_s = normalize_data(filtered_s, time_interval);
-        %plot(dsget(filtered_s,2,1,1,1));
 end
+
+
+
+%plot(dsget(filtered_s,2,1,1));
+
+%plot(dsget(filtered_s,2,1,1));
+
+%plot(dsget(filtered_s,2,1,1));
 
 %% create signals for different time-intervals
 %% extract features for each sensor 
@@ -100,7 +103,7 @@ function [filtered_s] = remove_mean(filtered_s, time_interval)
 % Remove mean from filtered dataset
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:(10 * time_interval)
+            for v_id = 1:10
                 ds = detrend(dsget(filtered_s, s_id, a_id, v_id, time_interval), 'constant');
                 filtered_s = dsput(filtered_s, ds, s_id, a_id, v_id,time_interval);
             end
@@ -112,7 +115,7 @@ function [filtered_s] = normalize_data(filtered_s, time_interval)
 % Normalize filtered dataset
     for s_id = 1:3
         for a_id = 1:4
-            for v_id = 1:(10 * time_interval)
+            for v_id = 1:10
                 s = dsget(filtered_s, s_id, a_id, v_id, time_interval);
                 
                 %compute standard deviation for each signal
@@ -121,7 +124,7 @@ function [filtered_s] = normalize_data(filtered_s, time_interval)
                 %divide the signal for the standard deviation
                 normalized_signal = s / standard_dev;
                 
-                filtered_s = dsput(filtered_s, normalized_signal, s_id, a_id, v_id, time_interval);     
+                filtered_s = dsput(filtered_s, normalized_signal, s_id, a_id, v_id);     
             end
         end
     end
