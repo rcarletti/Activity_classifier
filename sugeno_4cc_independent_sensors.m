@@ -1,21 +1,24 @@
 %% choose parameters for ANFIS - four class classifier (independent sensors)
 
-[fcc_ind.sugeno, fcc_ind.fis_input] = perform_sugeno(fcc_ind.best_sensor, features_ds);
+for time_interval = [1,2,4]
+    [fcc_ind{time_interval}.sugeno, fcc_ind{time_interval}.fis_input] = ...
+                    perform_sugeno(fcc_ind{time_interval}.best_sensor, features_ds, time_interval);
+end
 
-function [sugeno, input] = perform_sugeno(sensor, features_ds)
+function [sugeno, input] = perform_sugeno(sensor, features_ds, time_interval)
 
     % create the matrix with features for each couple activity-volunteer
     % the data are arranged in [ feat1, feat2, feat3, feat4, activity, volunteer ]
 
-    input = zeros(40,6);
+    input = zeros(40 * time_interval,6);
     for a_id = 1:4
-        for v_id = 1:10
+        for v_id = 1:(10 * time_interval)
             for f_id = 1:4
-                input((a_id - 1) * 10 + v_id, f_id) = dsgetfeature(features_ds, ...
-                    sensor.features(f_id), sensor.index, a_id, v_id);
+                input((a_id - 1) * 10 * time_interval + v_id, f_id) = dsgetfeature(features_ds, ...
+                    sensor.features(f_id), sensor.index, a_id, v_id, time_interval);
             end
-            input((a_id - 1) * 10 + v_id, 5) = a_id;
-            input((a_id - 1) * 10 + v_id, 6) = v_id;
+            input((a_id - 1) * 10 * time_interval + v_id, 5) = a_id;
+            input((a_id - 1) * 10 * time_interval + v_id, 6) = v_id;
         end
     end
 
@@ -25,12 +28,12 @@ function [sugeno, input] = perform_sugeno(sensor, features_ds)
 
     % select ANFIS data - 70%-30% split
 
-    ntrn = floor(40*0.7);
-    nchk = 40-ntrn;
+    ntrn = floor(40*0.7 * time_interval);
+    nchk = (40 * time_interval) - ntrn;
 
     sugeno = struct;
     sugeno.training_data = input_perm(1:ntrn, 1:5);
-    sugeno.validation_data = input_perm(ntrn+1:40, 1:5);
+    sugeno.validation_data = input_perm(ntrn+1:(40 * time_interval), 1:5);
 
     % generate and train the sugeno FIS
 

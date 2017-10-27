@@ -1,11 +1,13 @@
 %% ANFIS one-vs-all
 
-for i = 1:4
-    [onevsall_all{i}.sugeno, onevsall_all{i}.fis_input] = ...
-        perform_sugeno(onevsall_all{i}.net.features, i, features_ds);
+for time_interval = [1,2,4]
+    for i = 1:4
+        [onevsall_all{time_interval}{i}.sugeno, onevsall_all{time_interval}{i}.fis_input] = ...
+            perform_sugeno(onevsall_all{time_interval}{i}.net.features, i, features_ds, time_interval);
+    end
 end
 
-function [sugeno, input] = perform_sugeno(features, act, features_ds)
+function [sugeno, input] = perform_sugeno(features, act, features_ds, time_interval)
 % choose parameters for ANFIS - one-vs-all classifier (independent sensors)
 
     global total_features
@@ -13,18 +15,18 @@ function [sugeno, input] = perform_sugeno(features, act, features_ds)
     %create the matrix with features for each couple activity-volunteer
     %the data are arranged in [feat1,feat2,feat3,feat4,activity,volunteer]
 
-    input = zeros(40,6);
+    input = zeros(40 * time_interval,6);
     for a_id = 1:4
-        for v_id = 1:10
+        for v_id = 1:(10 * time_interval)
             for f_id = 1:4
-                input((a_id -1) *10 + v_id, f_id) = dsgetfeature(features_ds,...
+                input((a_id -1) * 10 * time_interval + v_id, f_id) = dsgetfeature(features_ds,...
                     mod(features(f_id),total_features) + 1, ...
                     ceil(features(f_id)/total_features),...
                     a_id, ...
-                    v_id);
+                    v_id, time_interval);
             end
-            input((a_id -1) * 10 + v_id, 5) = double(a_id == act);
-            input((a_id -1) * 10 + v_id, 6) = v_id;
+            input((a_id -1) * 10 * time_interval + v_id, 5) = double(a_id == act);
+            input((a_id -1) * 10 * time_interval + v_id, 6) = v_id;
         end
     end
 
@@ -34,12 +36,12 @@ function [sugeno, input] = perform_sugeno(features, act, features_ds)
 
     % select ANFIS data - 70%-30% split
 
-    ntrn = floor(40*0.7);
-    nchk = 40-ntrn;
+    ntrn = floor(40 * 0.7 * time_interval);
+    nchk = (40 * time_interval) - ntrn;
 
     sugeno = struct;
     sugeno.training_data = input_perm(1:ntrn, 1:5);
-    sugeno.validation_data = input_perm(ntrn+1:40, 1:5);
+    sugeno.validation_data = input_perm(ntrn+1:(40 * time_interval), 1:5);
 
     % generate and train the sugeno FIS
 

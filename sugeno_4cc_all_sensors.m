@@ -1,25 +1,28 @@
 %% choose parameters for ANFIS - four class classifier (independent sensors)
 
-[fcc_all.sugeno, fcc_all.fis_input] = perform_sugeno(fcc_all.net.features, features_ds);
+for time_interval = [1,2,4]
+[fcc_all{time_interval}.sugeno, fcc_all{time_interval}.fis_input] = ...
+        perform_sugeno(fcc_all{time_interval}.net.features, features_ds, time_interval);
+end
 
-function [sugeno, input] = perform_sugeno(features, features_ds)
+function [sugeno, input] = perform_sugeno(features, features_ds, time_interval)
 
     global total_features
     
     %create the matrix with features for each couple activity-volunteer
     %the data are arranged in [feat1,feat2,feat3,feat4,activity,volunteer]
-    input = zeros(40,6);
+    input = zeros(40 * time_interval,6);
     for a_id = 1:4
-        for v_id = 1:10
+        for v_id = 1:(time_interval * 10)
             for f_id = 1:4
-                input((a_id -1) *10 + v_id, f_id) = dsgetfeature(features_ds,...
+                input((a_id -1) * 10 * time_interval + v_id, f_id) = dsgetfeature(features_ds,...
                     mod(features(f_id),total_features) + 1, ...
                     ceil(features(f_id)/total_features),...
                     a_id, ...
-                    v_id);
+                    v_id, time_interval);
             end
-            input((a_id -1) * 10 + v_id, 5) = a_id;
-            input((a_id -1) * 10 + v_id, 6) = v_id;
+            input((a_id -1) * 10 * time_interval + v_id, 5) = a_id;
+            input((a_id -1) * 10 * time_interval + v_id, 6) = v_id;
         end
     end
     
@@ -28,12 +31,12 @@ function [sugeno, input] = perform_sugeno(features, features_ds)
     
     % select ANFIS data - 70%-30% split
 
-    ntrn = floor(40*0.7);
-    nchk = 40-ntrn;
+    ntrn = floor(40 * 0.7 * time_interval);
+    nchk = (40 * time_interval) - ntrn;
 
     sugeno = struct;
     sugeno.training_data = input_perm(1:ntrn, 1:5);
-    sugeno.validation_data = input_perm(ntrn+1:40, 1:5);
+    sugeno.validation_data = input_perm(ntrn+1:(40 * time_interval), 1:5);
 
     % generate and train the sugeno FIS
 

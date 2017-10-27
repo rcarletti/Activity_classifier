@@ -58,6 +58,8 @@ disp('-------------features selection onevsall classifier with independent senso
 
 features_selection_onevsall_all_sensors
 disp('-------------features selection onevsall classifier with all sensors done-------------')
+save('refactored_ws');
+disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - four class classifier - independents sensors
 % use the best sensor computed previously
@@ -73,9 +75,9 @@ sugeno_onevsall_independent_sensors
 %% sugeno-type FIS using ANFIS - one against all classifier - all sensors
 % use the best sensor computed previously
 sugeno_onevsall_all_sensors
-
 save('refactored_ws');
 disp(datetime('now'));
+
 
 %% mamdani-type FIS - four class classifier - independent sensors
 % use the best sensor computed previously
