@@ -1,20 +1,25 @@
 global fcc_all;
-global onevsall_all;
 
-fcc_all = struct;
-fcc_all.net = struct;
+fcc_all = cell(1,4);
+for time_interval = [1,2,4]
+    fcc_all{time_interval} = struct;
+    fcc_all{time_interval}.net = struct;
+end
 
-retrievebestfeatures(features_ds);
+%%
+for time_interval = [1,2,4]
+    retrievebestfeatures(features_ds,time_interval);
+end
 
-function [] = retrievebestfeatures(features_ds)
+function [] = retrievebestfeatures(features_ds, time_interval)
     
     global total_features;
     global chosen_features_num;
     global fcc_all;
     
     %build targets
-    O = ones(1,30);
-    Z = zeros(1,30);
+    O = ones(1,(30 * time_interval));
+    Z = zeros(1,(30 * time_interval));
     targets = [O Z Z Z ; Z O Z Z ; Z Z O Z ; Z Z Z O ];
     
     %set up things for the genetic algorithm 
@@ -41,9 +46,9 @@ function [] = retrievebestfeatures(features_ds)
     intcon = (1:total_features * 3);
     nonlinearcon = @(x)nonlcon(x);
     
-    feats = ga(@(x) fitnessall(x,targets, features_ds, '4cc'), total_features * 3, [], [], [], [], ...
+    feats = ga(@(x) fitnessall(x,targets, features_ds, '4cc', time_interval), total_features * 3, [], [], [], [], ...
             zeros(1,total_features * 3), ones(1,total_features * 3), nonlinearcon, intcon, options);
         
-    fcc_all.net.features = genes2feat(feats);
+    fcc_all{time_interval}.net.features = genes2feat(feats);
     
 end

@@ -24,7 +24,7 @@ function [sensor, net] = feature_selection(features_ds, time_interval)
     
     % create target and input vectors for neural network training
 
-    Z = zeros(1,(10* time_interval));
+    Z = zeros(1,(10 * time_interval));
     O = ones(1,(10 * time_interval));
 
     targets = [O Z Z Z ; Z O Z Z ; Z Z O Z ; Z Z Z O ];
@@ -37,7 +37,7 @@ function [sensor, net] = feature_selection(features_ds, time_interval)
             for a_id = 1:4
                 for v_id = 1:(10 * time_interval)
                     for f_id = 1:chosen_features_num
-                        inputs{s_id}(f_id, ((a_id-1) * 10) + v_id, t_id) = ...
+                        inputs{s_id}(f_id, ((a_id-1) * 10 * time_interval) + v_id, t_id) = ...
                             dsgetfeature(features_ds, C(t_id, f_id), s_id, a_id, v_id, time_interval);
                     end
                 end

@@ -1,15 +1,27 @@
 
 global onevsall_all;
-for i = 1:4
-    onevsall_all{i} = struct;
-    onevsall_all{i}.net = struct;
+onevsall_all = cell(1,4);
+
+for time_interval = [1,2,4]
+    onevsall_all{time_interval} = cell(1,4);
+    for i = 1:4
+        onevsall_all{time_interval}{i} = struct;
+        onevsall_all{time_interval}{i}.net = struct;
+    end
 end
+
+
 
 %% retrieve best features and sensor for each classifier
 
-retrievebestfeatures(i,features_ds);
+for time_interval = [1,2,4]
+    for act = 1:4
+        retrievebestfeatures(act,features_ds, time_interval);
+    end
+end
 
-function [] = retrievebestfeatures(act, features_ds)
+
+function [] = retrievebestfeatures(act, features_ds, time_interval)
     
     global total_features;
     global chosen_features_num;
@@ -17,10 +29,10 @@ function [] = retrievebestfeatures(act, features_ds)
     
     %generate targets for class act
    
-    targets = zeros(2, 120);
-    targets(2,:) = ones(1, 120);
-    targets(1, (1:30) + (act-1)*10) = ones(1,30);
-    targets(2, (1:30) + (act-1)*10) = zeros(1,30);
+    targets = zeros(2, 120 * time_interval);
+    targets(2,:) = ones(1, 120 * time_interval);
+    targets(1, (1:30 * time_interval) + (act-1)* 10 * time_interval) = ones(1,30 * time_interval);
+    targets(2, (1:30 * time_interval) + (act-1)* 10 * time_interval) = zeros(1,30 * time_interval);
 
     
     %set up the GA
@@ -46,21 +58,22 @@ function [] = retrievebestfeatures(act, features_ds)
     nonlinearcon = @(x)nonlcon(x);
 
     %run the genetic algoritm
-
+    feats = zeros(1,4);
     for i=1:4
-        feats = ga(@(x) fitnessall(x,...
+        feats(i) = ga(@(x) fitnessall(x,...
                 targets,...
                 features_ds, ...
-                strcat(int2str(i),'vsall')), ...
+                strcat(int2str(i),'vsall'), time_interval), ...
                 total_features * 3,...
                 [], [], [], [], ...
                 zeros(1,total_features * 3), ones(1,total_features * 3), ...
                 nonlinearcon, ...
                 intcon, ...
                 options);
+                onevsall_all{time_interval}{act}.net.features = genes2feat(feats);
     disp(strcat('-------end of class n.', num2str(i)));
     end
     
-    onevsall_all{act}.net.features = genes2feat(feats);
+    
 
 end
