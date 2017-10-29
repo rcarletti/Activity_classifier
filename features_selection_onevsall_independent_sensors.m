@@ -3,14 +3,10 @@
 onevsall_ind = cell(1,4);
 for time_interval = [1,2,4]
     onevsall_ind{time_interval} = cell(1,4);
-end
 
-%%
-
-for time_interval = [1,2,4]
-    for i = 1:4
-        [onevsall_ind{time_interval}{i}.best_sensor, onevsall_ind{time_interval}{i}.net] = ...
-            feature_selection(i, features_ds, time_interval);
+    for act = 1:4
+        [onevsall_ind{time_interval}{act}.best_sensor, onevsall_ind{time_interval}{act}.net] = ...
+            feature_selection(act, features_ds, time_interval);
     end
 end
 
@@ -27,17 +23,17 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
 
     targets = zeros(2, (40 * time_interval));
     targets(2,:) = ones(1, (40 * time_interval));
-    targets(1, (1:(10 * time_interval)) + (act-1)*10 * time_interval) = ones(1,10 * time_interval);
-    targets(2, (1:(10 * time_interval)) + (act-1)*10 * time_interval) = zeros(1,10 * time_interval);
+    targets(1, (1:(10 * time_interval)) + (act - 1) * 10 * time_interval) = ones(1, 10 * time_interval);
+    targets(2, (1:(10 * time_interval)) + (act - 1) * 10 * time_interval) = zeros(1, 10 * time_interval);
 
     inputs = cell(1,3);
     for s_id = 1:3
         inputs{s_id} = zeros(4, (40 * time_interval), size(C,1));
+
         for t_id = 1:size(C,1)
             for a_id = 1:4
                 for v_id = 1:(10 * time_interval)
                     for f_id = 1:chosen_features_num
-                        % da riguardare
                         inputs{s_id}(f_id, ((a_id-1) * 10 * time_interval) + v_id, t_id) = ...
                             dsgetfeature(features_ds, C(t_id, f_id), s_id, a_id, v_id, time_interval);
                     end
@@ -78,11 +74,13 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
     % get the best set of features for each sensor
 
     best_features = cell(1,3);
+    f_tot = total_features;
+    
     parfor s_id=1:3
         best_features{s_id}.genes = ga(@(x) ...
             fitnessfunction(neural_networks{s_id}, x), ...
-            total_features, [], [], [], [], ...
-            zeros(1,total_features), ones(1,total_features), nonlinearcon, intcon, options);
+            f_tot, [], [], [], [], zeros(1, f_tot), ones(1, f_tot), ...
+            nonlinearcon, intcon, options);
         best_features{s_id}.features = genes2feat(best_features{s_id}.genes);
     end
 

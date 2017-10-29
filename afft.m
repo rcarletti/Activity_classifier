@@ -1,4 +1,5 @@
 function [Y,f] = afft(x, Ts)
+% FFT of signal x sampled with period Ts
     L = length(x);
     Fs = 1/Ts;
     

@@ -1,9 +1,12 @@
 %% create mamdani fis
 
-[fcc_ind.mamdani, feat_mat] = perform_fis(fcc_ind.best_sensor, fcc_ind.fis_input, ...
-    fcc_ind.sugeno.fis, features_ds, features_names);
+for time_interval = [1,2,4]
+    [fcc_ind{time_interval}.mamdani, feat_mat] = perform_fis(...
+        fcc_ind{time_interval}.best_sensor, fcc_ind{time_interval}.fis_input, ...
+        fcc_ind{time_interval}.sugeno.fis, features_ds, features_names, time_interval);
+end
 
-function [mamdani, app] = perform_fis(sensor, input, sugeno, features_ds, features_names)
+function [mamdani, app] = perform_fis(sensor, input, sugeno, features_ds, features_names, time_interval)
 
     % create Mamdani FIS
 
@@ -20,13 +23,14 @@ function [mamdani, app] = perform_fis(sensor, input, sugeno, features_ds, featur
     % add inputs to the FIS using the features of the best sensor previously computed
 
     bounds = zeros(4,2);  %[min, max]
-    app = zeros(4,40);
+    app = zeros(4,40 * time_interval);
 
     for a_id = 1:4
-        for v_id = 1:10
+        for v_id = 1:(10 * time_interval)
             for f_id = 1:4
-                app(f_id, (a_id - 1) * 10 + v_id) = dsgetfeature(features_ds, ...
-                    sensor.features(f_id), sensor.index, a_id, v_id); 
+                app(f_id, (a_id - 1) * 10 * time_interval + v_id) = ...
+                    dsgetfeature(features_ds, sensor.features(f_id), ...
+                    sensor.index, a_id, v_id, time_interval); 
             end
         end
     end

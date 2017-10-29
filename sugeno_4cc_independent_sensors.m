@@ -2,7 +2,7 @@
 
 for time_interval = [1,2,4]
     [fcc_ind{time_interval}.sugeno, fcc_ind{time_interval}.fis_input] = ...
-                    perform_sugeno(fcc_ind{time_interval}.best_sensor, features_ds, time_interval);
+        perform_sugeno(fcc_ind{time_interval}.best_sensor, features_ds, time_interval);
 end
 
 function [sugeno, input] = perform_sugeno(sensor, features_ds, time_interval)
@@ -10,7 +10,7 @@ function [sugeno, input] = perform_sugeno(sensor, features_ds, time_interval)
     % create the matrix with features for each couple activity-volunteer
     % the data are arranged in [ feat1, feat2, feat3, feat4, activity, volunteer ]
 
-    input = zeros(40 * time_interval,6);
+    input = zeros(40 * time_interval, 6);
     for a_id = 1:4
         for v_id = 1:(10 * time_interval)
             for f_id = 1:4
@@ -28,7 +28,7 @@ function [sugeno, input] = perform_sugeno(sensor, features_ds, time_interval)
 
     % select ANFIS data - 70%-30% split
 
-    ntrn = floor(40*0.7 * time_interval);
+    ntrn = floor(40 * 0.7 * time_interval);
     nchk = (40 * time_interval) - ntrn;
 
     sugeno = struct;

@@ -1,7 +1,7 @@
 %% choose parameters for ANFIS - four class classifier (independent sensors)
 
 for time_interval = [1,2,4]
-[fcc_all{time_interval}.sugeno, fcc_all{time_interval}.fis_input] = ...
+    [fcc_all{time_interval}.sugeno, fcc_all{time_interval}.fis_input] = ...
         perform_sugeno(fcc_all{time_interval}.net.features, features_ds, time_interval);
 end
 

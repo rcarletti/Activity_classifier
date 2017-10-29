@@ -5,38 +5,46 @@ global total_features;
 
 chosen_features_num = 4;
 
-%% filter and normalize data
+%% split data into time intervals
 
-
-%hold on;
 %create one dataset for each time interval [164s,82s,41s]
-data_raw = cell(1,3);
-for time_interval = [1,2,4]
-    data_raw{time_interval} = dsnew(time_interval);
-    data_raw = filldata(data, data_raw, time_interval);
+data_raw = cell(1,4);
+for time_intervals = [1,2,4]
+    data_raw{time_intervals} = dsnew(time_intervals);
+    data_raw = fill_data(data, data_raw, time_intervals);
 end
 
-%%
-filtered_s = cell(1,3);
-for time_interval = [1,2,4]
-        filtered_s{time_interval} = dsnew(time_interval);
+%% filter data
+
+Fpass = 0.4;
+Fstop = 0.41;
+Apass = 1;
+Astop = 40;
+
+df = designfilt('lowpassfir', 'DesignMethod', 'kaiserwin', ...
+  'PassbandFrequency', Fpass, 'StopbandFrequency', Fstop, ...
+  'PassbandRipple', Apass, 'StopbandAttenuation', Astop);
+
+filtered_s = cell(1,4);
+for time_intervals = [1,2,4]
+        filtered_s{time_intervals} = dsnew(time_intervals);
         %plot(dsget(data_raw,2,1,1,1));
         %hold on
-        [filtered_s, Hd] = filter_data(filtered_s,data_raw, time_interval);
+        filtered_s = filter_data(filtered_s, df, data_raw, time_intervals);
         %plot(dsget(filtered_s,2,1,1,1));
-        filtered_s = remove_mean(filtered_s, time_interval);
+        filtered_s = remove_mean(filtered_s, time_intervals);
         %plot(dsget(filtered_s,2,1,1,1));
-        filtered_s = normalize_data(filtered_s, time_interval);
+        filtered_s = normalize_data(filtered_s, time_intervals);
         %plot(dsget(filtered_s,2,1,1,1));
 end
 
+%% extract features for each sensor and time interval
 
-%% extract features for each sensor for each time interval
-
-features_ds = cell(1,3);
-for time_interval = [1,2,4]
-        features_ds{time_interval} = dsnew(time_interval);
-        [features_ds, features_names, total_features] = extract_features(filtered_s,features_ds, time_interval);
+features_ds = cell(1,4);
+for time_intervals = [1,2,4]
+        features_ds{time_intervals} = dsnew(time_intervals);
+        [features_ds, features_names, total_features] = ...
+            extract_features(filtered_s,features_ds, time_intervals);
 end
 
 %% features selection for the 4 class classifier (independent sensors)
@@ -44,40 +52,63 @@ end
 features_selection_4cc_independent_sensors
 disp('-------------features selection four class classifier with independent sensors done-------------')
 
+save('refactored_ws');
+disp(datetime('now'));
+
 %% features selection for the 4 class classifier (all sensors)
 
 features_selection_4cc_all_sensors
 disp('-------------features selection four class classifier with all sensors done-------------')
+
+save('refactored_ws');
+disp(datetime('now'));
 
 %% features selection for the one-against-all classifier (independent sensors)
 
 features_selection_onevsall_independent_sensors
 disp('-------------features selection onevsall classifier with independent sensors done-------------')
 
+save('refactored_ws');
+disp(datetime('now'));
+
 %% features selection for the one-against-all classifier (all sensors)
 
 features_selection_onevsall_all_sensors
 disp('-------------features selection onevsall classifier with all sensors done-------------')
+
 save('refactored_ws');
 disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - four class classifier - independents sensors
 % use the best sensor computed previously
+
 sugeno_4cc_independent_sensors
 
-%% sugeno-type FIS using ANFIS - four class classifier - all sensors
-sugeno_4cc_all_sensors
-
-%% sugeno-type FIS using ANFIS - one against all classifier - independent sensors
-% use the best sensor computed previously
-sugeno_onevsall_independent_sensors
-
-%% sugeno-type FIS using ANFIS - one against all classifier - all sensors
-% use the best sensor computed previously
-sugeno_onevsall_all_sensors
 save('refactored_ws');
 disp(datetime('now'));
 
+%% sugeno-type FIS using ANFIS - four class classifier - all sensors
+
+sugeno_4cc_all_sensors
+
+save('refactored_ws');
+disp(datetime('now'));
+
+%% sugeno-type FIS using ANFIS - one against all classifier - independent sensors
+% use the best sensor computed previously
+
+sugeno_onevsall_independent_sensors
+
+save('refactored_ws');
+disp(datetime('now'));
+
+%% sugeno-type FIS using ANFIS - one against all classifier - all sensors
+% use the best sensor computed previously
+
+sugeno_onevsall_all_sensors
+
+save('refactored_ws');
+disp(datetime('now'));
 
 %% mamdani-type FIS - four class classifier - independent sensors
 % use the best sensor computed previously
@@ -86,16 +117,13 @@ disp(datetime('now'));
 
 %% Helper functions
 
-function [filtered_s, hd] = filter_data(filtered_s,data_raw, time_interval)
+function [filtered_s] = filter_data(filtered_s, df, data_raw, time_interval)
 % Apply Savitzky-Golay filter to input data
-    
+
     for s_id = 1:3           %for each sensor
         for a_id = 1:4       %for each actovity
             for v_id  = 1:(10 * time_interval) %for each volunteer
-                b = fir1(400,.4);
-                hd = dfilt.dffir(b);
-                y1 = filter(hd,dsget(data_raw,s_id, a_id, v_id, time_interval));
-                zf = hd.states;
+                y1 = filter(df, dsget(data_raw, s_id, a_id, v_id, time_interval));
                 filtered_s = dsput(filtered_s, y1, s_id, a_id, v_id, time_interval);
             end
         end
@@ -148,30 +176,28 @@ function [features_ds, features_names, total_features] = extract_features(filter
         end
     end
 
-    features_names = ["min", "max", "std_dev", "peak2rms", "peak2peak", ...
-        "rssq", "occupied_band", "power", "meanfreq", "bandpower"];
+    features_names = [ "min", "max", "median", "rms", "meanabs", "sumabs", ...
+        "sumabsdiff", "peak2rms", "peak2peak", "rssq", "zc", "mue", "mle", ...
+        "obw", "pobw", "meanfreq", "medfreq", "bandpower", "sumfft", ...
+        "powDC", "npeaks", "avgpeakdist", "sumpsd" ];
 end
 
-
-
-
-function [data_raw] = filldata(data, data_raw, time_interval)
+function [data_raw] = fill_data(data, data_raw, time_interval)
+% Split data in the given time intervals
 
     for s_id = 1:3
         for a_id = 1:4
             for v_id = 1:10
                 s = dsgetdata(data, s_id, a_id, v_id);
-                for t=1:time_interval
-                    a = 1+(2000/time_interval)*(t-1);
-                    b = (2000/time_interval * t);
-                    data_raw = ...
-                        dsput(data_raw,...
-                        s(a:b),...
-                        s_id, a_id, (v_id - 1)*time_interval + t, time_interval);
+
+                for t = 1:time_interval
+                    a = 1+(length(s)/time_interval) * (t-1);
+                    b = (length(s)/time_interval) * t;
+                    data_raw = dsput(data_raw, s(a:b), s_id, a_id, ...
+                        (v_id - 1) * time_interval + t, time_interval);
                 end
 
             end
         end
     end
 end
-
