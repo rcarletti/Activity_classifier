@@ -52,7 +52,6 @@ end
 features_selection_4cc_independent_sensors
 disp('-------------features selection four class classifier with independent sensors done-------------')
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% features selection for the 4 class classifier (all sensors)
@@ -60,7 +59,6 @@ disp(datetime('now'));
 features_selection_4cc_all_sensors
 disp('-------------features selection four class classifier with all sensors done-------------')
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% features selection for the one-against-all classifier (independent sensors)
@@ -68,7 +66,6 @@ disp(datetime('now'));
 features_selection_onevsall_independent_sensors
 disp('-------------features selection onevsall classifier with independent sensors done-------------')
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% features selection for the one-against-all classifier (all sensors)
@@ -76,7 +73,6 @@ disp(datetime('now'));
 features_selection_onevsall_all_sensors
 disp('-------------features selection onevsall classifier with all sensors done-------------')
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - four class classifier - independents sensors
@@ -84,14 +80,12 @@ disp(datetime('now'));
 
 sugeno_4cc_independent_sensors
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - four class classifier - all sensors
 
 sugeno_4cc_all_sensors
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - one against all classifier - independent sensors
@@ -99,7 +93,6 @@ disp(datetime('now'));
 
 sugeno_onevsall_independent_sensors
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% sugeno-type FIS using ANFIS - one against all classifier - all sensors
@@ -107,7 +100,6 @@ disp(datetime('now'));
 
 sugeno_onevsall_all_sensors
 
-save('refactored_ws');
 disp(datetime('now'));
 
 %% mamdani-type FIS - four class classifier - independent sensors
