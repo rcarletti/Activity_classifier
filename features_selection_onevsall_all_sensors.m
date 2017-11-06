@@ -7,7 +7,7 @@ for time_interval = [1,2,4]
 
     for act = 1:4
         onevsall_all{time_interval}{act} = struct;
-        onevsall_all{time_interval}{act}.net = struct;
+        onevsall_all{time_interval}{act}.nets = cell(1,0);
         feature_selection(act, features_ds, time_interval);
         
     end
@@ -29,7 +29,7 @@ function feature_selection(act, features_ds, time_interval)
     % set up the GA, this time we consider 23 features for each sensor
 
     population_size = 100;
-    population = zeros(100, total_features * 3);
+    population = zeros(population_size, total_features * 3);
 
     % generate random population (pop_size x total_features) array
     % features set to 1 are the chosen features for that individual
@@ -44,6 +44,7 @@ function feature_selection(act, features_ds, time_interval)
     options = gaoptimset(@ga);
     options.PopulationType = 'doubleVector';
     options.InitialPopulation = population;
+    options.Generations = 100;
     options.useParallel = 'true';
 
     intcon = (1:total_features * 3);
@@ -59,5 +60,5 @@ function feature_selection(act, features_ds, time_interval)
         zeros(1,total_features * 3), ones(1,total_features * 3), ...
         nonlinearcon, intcon, options);
 
-    onevsall_all{time_interval}{act}.net.features = genes2feat(feats);
+    onevsall_all{time_interval}{act}.features = genes2feat(feats);
 end

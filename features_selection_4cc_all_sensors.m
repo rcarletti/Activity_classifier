@@ -5,7 +5,7 @@ global fcc_all;
 fcc_all = cell(1,4);
 for time_interval = [1,2,4]
     fcc_all{time_interval} = struct;
-    fcc_all{time_interval}.net = struct;
+    fcc_all{time_interval}.nets = cell(1,0);
     retrievebestfeatures(features_ds,time_interval);
 end
 
@@ -25,7 +25,7 @@ function [] = retrievebestfeatures(features_ds, time_interval)
     % this time we consider 33 features, 11 features for each sensor
 
     population_size = 100;
-    population_all = zeros(100, total_features * 3);
+    population_all = zeros(population_size, total_features * 3);
     rng('shuffle');
 
     % generate random population (pop_size x total_features) array
@@ -41,6 +41,7 @@ function [] = retrievebestfeatures(features_ds, time_interval)
     options = gaoptimset(@ga);
     options.PopulationType = 'doubleVector';
     options.InitialPopulation = population_all;
+    options.Generations = 100;
     options.useParallel = 'true';
 
     intcon = (1:total_features * 3);
@@ -50,5 +51,5 @@ function [] = retrievebestfeatures(features_ds, time_interval)
         total_features * 3, [], [], [], [], zeros(1,total_features * 3), ...
         ones(1,total_features * 3), nonlinearcon, intcon, options);
         
-    fcc_all{time_interval}.net.features = genes2feat(feats);
+    fcc_all{time_interval}.features = genes2feat(feats);
 end

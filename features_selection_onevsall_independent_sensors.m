@@ -5,12 +5,12 @@ for time_interval = [1,2,4]
     onevsall_ind{time_interval} = cell(1,4);
 
     for act = 1:4
-        [onevsall_ind{time_interval}{act}.best_sensor, onevsall_ind{time_interval}{act}.net] = ...
-            feature_selection(act, features_ds, time_interval);
+        [onevsall_ind{time_interval}{act}.results, onevsall_ind{time_interval}{act}.best_sensor, ...
+            onevsall_ind{time_interval}{act}.net] = feature_selection(act, features_ds, time_interval);
     end
 end
 
-function [sensor, net] = feature_selection(act, features_ds, time_interval)
+function [results, sensor, net] = feature_selection(act, features_ds, time_interval)
     global chosen_features_num;
     global total_features;
 
@@ -53,7 +53,7 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
     %the chosen features for that individual
 
     population_size = 100;
-    population = zeros(100, total_features);
+    population = zeros(population_size, total_features);
     rng('shuffle');
 
     for i=1:population_size
@@ -66,6 +66,7 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
     options = gaoptimset(@ga);
     options.PopulationType = 'doubleVector';
     options.InitialPopulation = population;
+    options.Generations = 100;
     options.useParallel = 'true';
 
     intcon = (1:total_features);
@@ -73,22 +74,22 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
 
     % get the best set of features for each sensor
 
-    best_features = cell(1,3);
+    results = cell(1,3);
     f_tot = total_features;
     
     parfor s_id=1:3
-        best_features{s_id}.genes = ga(@(x) ...
+        results{s_id}.genes = ga(@(x) ...
             fitnessfunction(neural_networks{s_id}, x), ...
             f_tot, [], [], [], [], zeros(1, f_tot), ones(1, f_tot), ...
             nonlinearcon, intcon, options);
-        best_features{s_id}.features = genes2feat(best_features{s_id}.genes);
+        results{s_id}.features = genes2feat(results{s_id}.genes);
     end
 
     % compute accuracy for each sensor
 
     for s_id=1:3
-        net = getnetworkbyfeatures(neural_networks{s_id}, best_features{s_id}.features);
-        best_features{s_id}.accuracy = 1 - net.conf;
+        results{s_id}.net = getnetworkbyfeatures(neural_networks{s_id}, results{s_id}.features);
+        results{s_id}.accuracy = 1 - results{s_id}.net.conf;
     end
 
     % choose the best sensor for the classifier
@@ -97,14 +98,14 @@ function [sensor, net] = feature_selection(act, features_ds, time_interval)
     best_s_id = 1;
 
     for s_id=1:3
-        if best_features{s_id}.accuracy > max_acc
-            max_acc = best_features{s_id}.accuracy;
+        if results{s_id}.accuracy > max_acc
+            max_acc = results{s_id}.accuracy;
             best_s_id = s_id;
         end
     end
 
     sensor.index = best_s_id;
-    sensor.features = best_features{best_s_id}.features;
+    sensor.features = results{best_s_id}.features;
     sensor.accuracy = max_acc;
     
     net = getnetworkbyfeatures(neural_networks{best_s_id}, sensor.features);
