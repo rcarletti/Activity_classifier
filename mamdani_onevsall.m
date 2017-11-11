@@ -5,9 +5,16 @@ if ~exist('mamdani', 'var')
 end
 
 mamdani.onevsall = cell(1,4);
+
+%%
 mamdani.onevsall{1} = eval_mamdani_onevsall('Mamdani_1vsAll_all_164s.fis', 1, ...
     onevsall_all{1}{1}.features, features_ds, 0, 1);
 
+%%
+mamdani.onevsall{2} = eval_mamdani_onevsall('Mamdani_2vsAll_all_41s.fis', 2, ...
+    onevsall_all{4}{2}.features, features_ds, 0, 4);
+
+%%
 function mamdani = eval_mamdani_onevsall(filename, act, features, features_ds, ...
                                          sensor_id, time_interval)
     global total_features
@@ -45,9 +52,12 @@ function mamdani = eval_mamdani_onevsall(filename, act, features, features_ds, .
 
     mamdani.outputs = evalfis(mamdani.inputs, mamdani.fis)';
     mamdani.rms = rms(mamdani.outputs - mamdani.targets);
+    mamdani.crisp = (mamdani.outputs > 0.5);
     
     % Plot target and output values
-
-    plot(1:(40 * time_interval), mamdani.outputs, 1:(40 * time_interval), mamdani.targets);
+    figure;
+    plot(1:(40 * time_interval), mamdani.crisp, '*b', ...
+         1:(40 * time_interval), mamdani.targets, '+r', ...
+         1:(40 * time_interval), mamdani.outputs);
     
 end

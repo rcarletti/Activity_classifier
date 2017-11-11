@@ -12,7 +12,7 @@ end
 
 %% one-vs-all classifier
 
-aid = 1; % activity to plot
+aid = 2; % activity to plot
 
 for tid = [1,2,4]
     plot_feat(features_ds, onevsall_ind{tid}{aid}.best_sensor.features, features_names, ...
@@ -51,4 +51,6 @@ function plot_feat(features_ds, feats, names, sensor, time_interval)
         plot(ff(f_id, :));
         title(names(feats(f_id)));
     end
+    
+    hold off;
 end
