@@ -16,8 +16,8 @@ function [] = retrievebestfeatures(features_ds, time_interval)
     
     % create targets
 
-    Z = zeros(1, (10 * 3 * time_interval));
-    O = ones(1, (10 * 3 * time_interval));
+    Z = zeros(1, (10 * time_interval));
+    O = ones(1, (10 * time_interval));
 
     targets = [O Z Z Z ; Z O Z Z ; Z Z O Z ; Z Z Z O ];
     

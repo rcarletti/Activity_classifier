@@ -26,53 +26,48 @@ function [conf] = fitnessall(features_set, targets, features_ds, type, time_inte
     end
     
     % otherwise, create and train the NN and add it to the NN cache
+    nn = struct;
+    nn.features = features;
     
     % build the inputs matrix, starting from the features set computed by the GA
-    inputs = zeros(chosen_features_num, (120 * time_interval));
+    nn.inputs = zeros(chosen_features_num, (40 * time_interval));
     for a_id = 1:4
-        for v_id = 1:(10 * 3 * time_interval)
+        for v_id = 1:(10 * time_interval)
             for f_id = 1:chosen_features_num
-                inputs(f_id, ((a_id - 1) * 30  * time_interval + v_id)) = ...
+                nn.inputs(f_id, ((a_id - 1) * 10 * time_interval + v_id)) = ...
                     dsgetfeature(features_ds, ...
                         mod(features(f_id) - 1, total_features) + 1,...     %feature_index
-                        ceil(v_id / (10 * time_interval)),...               %sensor_id
-                        a_id,...
-                        mod(v_id - 1, (10 * time_interval)) + 1,...
-                        time_interval);
+                        ceil(features(f_id) / total_features),...           %sensor_id
+                        a_id, v_id, time_interval);
             end
         end
     end
+
+    nn.targets = targets;
     
     % create the NN
-    net = patternnet(10);
-    net.divideParam.trainRatio = 70/100;
-    net.divideParam.valRatio = 15/100;
-    net.divideParam.testRatio = 15/100;
-    net.trainParam.showWindow = false;
+    nn.net = patternnet(10);
+    nn.net.divideParam.trainRatio = 70/100;
+    nn.net.divideParam.valRatio = 15/100;
+    nn.net.divideParam.testRatio = 15/100;
+    nn.net.trainParam.showWindow = false;
+
+    [nn.net, nn.tr] = train(nn.net,nn.inputs,nn.targets);
     
-    [net,tr] = train(net,inputs,targets);
-    
-    out = net(inputs);
-    conf = confusion(targets, out);
+    nn.results = nn.net(nn.inputs);
+    nn.perf = perform(nn.net, nn.targets, nn.results);
+    nn.conf = confusion(nn.targets, nn.results);
+    nn.accuracy = 1 - nn.conf;
     
     % cache the trained NN
     if strcmp(type, '4cc')
         id = length(fcc_all{time_interval}.nets) + 1;
-
-        fcc_all{time_interval}.nets{id} = struct;
-        fcc_all{time_interval}.nets{id}.tr = tr;
-        fcc_all{time_interval}.nets{id}.accuracy = 1 - conf;
-        fcc_all{time_interval}.nets{id}.net = net;
-        fcc_all{time_interval}.nets{id}.features = features;
+        fcc_all{time_interval}.nets{id} = nn;
     else
         num = str2double(type(1));
         id = length(onevsall_all{time_interval}{num}.nets) + 1;
-
-        onevsall_all{time_interval}{num}.nets{id} = struct;
-        onevsall_all{time_interval}{num}.nets{id}.tr = tr;
-        onevsall_all{time_interval}{num}.nets{id}.accuracy = 1 - conf;
-        onevsall_all{time_interval}{num}.nets{id}.net = net;
-        onevsall_all{time_interval}{num}.nets{id}.features = features;
+        onevsall_all{time_interval}{num}.nets{id} = nn;
     end
  
+    conf = nn.conf;
 end

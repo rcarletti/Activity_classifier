@@ -18,8 +18,7 @@ function [sugeno, input] = perform_sugeno(features, features_ds, time_interval)
                 input((a_id -1) * 10 * time_interval + v_id, f_id) = dsgetfeature(features_ds,...
                     mod(features(f_id) - 1,total_features) + 1, ...     %feature_index
                     ceil(features(f_id)/total_features),...             %sensor id
-                    a_id, ...
-                    v_id, time_interval);
+                    a_id, v_id, time_interval);
             end
             input((a_id -1) * 10 * time_interval + v_id, 5) = a_id;
             input((a_id -1) * 10 * time_interval + v_id, 6) = v_id;

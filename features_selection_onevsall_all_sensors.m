@@ -20,11 +20,11 @@ function feature_selection(act, features_ds, time_interval)
     
     % generate targets for class act
    
-    targets = zeros(2, 40 * 3 * time_interval);
-    targets(2,:) = ones(1, 40 * 3 * time_interval);
+    targets = zeros(2, 40 * time_interval);
+    targets(2,:) = ones(1, 40 * time_interval);
 
-    targets(1, (1:(30 * time_interval)) + (act-1) * 30 * time_interval) = ones(1, 30 * time_interval);
-    targets(2, (1:(30 * time_interval)) + (act-1) * 30 * time_interval) = zeros(1, 30 * time_interval);
+    targets(1, (1:(10 * time_interval)) + (act-1) * 10 * time_interval) = ones(1, 10 * time_interval);
+    targets(2, (1:(10 * time_interval)) + (act-1) * 10 * time_interval) = zeros(1, 10 * time_interval);
 
     % set up the GA, this time we consider 23 features for each sensor
 
