@@ -40,9 +40,11 @@ function mamdani = eval_mamdani_fcc(fcc, features_ds)
 
     mamdani.outputs = evalfis(mamdani.inputs, mamdani.fis)';
     mamdani.rms = rms(mamdani.outputs - mamdani.targets);
+    mamdani.crisp = round(mamdani.outputs);
     
     % Plot target and output values
-
-    plot(1:(40 * time_interval), mamdani.outputs, 1:(40 * time_interval), mamdani.targets);
-    
+    figure;
+    plot(1:(40 * time_interval), mamdani.crisp, '*b', ...
+         1:(40 * time_interval), mamdani.targets, '+r', ...
+         1:(40 * time_interval), mamdani.outputs);
 end
