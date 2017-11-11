@@ -15,6 +15,10 @@ mamdani.onevsall{2} = eval_mamdani_onevsall('Mamdani_2vsAll_all_41s.fis', 2, ...
     onevsall_all{4}{2}.features, features_ds, 0, 4);
 
 %%
+mamdani.onevsall{3} = eval_mamdani_onevsall('Mamdani_3vsAll_all_82s.fis', 3, ...
+    onevsall_all{2}{3}.features, features_ds, 0, 2);
+
+%%
 function mamdani = eval_mamdani_onevsall(filename, act, features, features_ds, ...
                                          sensor_id, time_interval)
     global total_features
