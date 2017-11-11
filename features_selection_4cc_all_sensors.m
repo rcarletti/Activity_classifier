@@ -52,4 +52,12 @@ function [] = retrievebestfeatures(features_ds, time_interval)
         ones(1,total_features * 3), nonlinearcon, intcon, options);
         
     fcc_all{time_interval}.features = genes2feat(feats);
+    
+    for i = 1:length(fcc_all{time_interval}.nets)
+        if isequal(fcc_all{time_interval}.nets{i}.features, ...
+                fcc_all{time_interval}.features)
+            fcc_all{time_interval}.best_net = fcc_all{time_interval}.nets{i};
+            break;
+        end
+    end
 end

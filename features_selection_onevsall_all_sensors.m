@@ -61,4 +61,13 @@ function feature_selection(act, features_ds, time_interval)
         nonlinearcon, intcon, options);
 
     onevsall_all{time_interval}{act}.features = genes2feat(feats);
+    
+    for i = 1:length(onevsall_all{time_interval}{act}.nets)
+        if isequal(onevsall_all{time_interval}{act}.nets{i}.features, ...
+                onevsall_all{time_interval}{act}.features)
+            onevsall_all{time_interval}{act}.best_net = ...
+                onevsall_all{time_interval}{act}.nets{i};
+            break;
+        end
+    end
 end
