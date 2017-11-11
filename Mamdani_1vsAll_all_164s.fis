@@ -1,0 +1,57 @@
+[System]
+Name='Mamdani_1vsAll_all_164s'
+Type='mamdani'
+Version=2.0
+NumInputs=4
+NumOutputs=1
+NumRules=3
+AndMethod='min'
+OrMethod='max'
+ImpMethod='min'
+AggMethod='max'
+DefuzzMethod='centroid'
+
+[Input1]
+Name='median'
+Range=[-0.4 0.4]
+NumMFs=4
+MF1='lowest':'gauss2mf',[0.109 -0.432 0.0396 -0.284749799786618]
+MF2='low':'gauss2mf',[0.0258 -0.172 0.0356 -0.0941074379840178]
+MF3='med':'gauss2mf',[0.0411 0.0435 0.031 0.128230156784181]
+MF4='high':'gauss2mf',[0.028 0.222162179916876 0.136 0.428]
+
+[Input2]
+Name='sumabsdiff'
+Range=[0 700]
+NumMFs=3
+MF1='low':'gauss2mf',[95.1 -28 31.9 32.726043319473]
+MF2='med':'gauss2mf',[29.9 177 34.6 307.834498032381]
+MF3='high':'gauss2mf',[38.1 416 95.1 566.264800232886]
+
+[Input3]
+Name='peak2peak'
+Range=[3.5 7]
+NumMFs=3
+MF1='low':'gauss2mf',[0.476 3.36 0.283593155346788 3.87283384301733]
+MF2='med':'gauss2mf',[0.265 4.78 0.266 5.3149944589854]
+MF3='high':'gauss2mf',[0.274 6.12204969377373 0.476 7.14]
+
+[Input4]
+Name='sumfft'
+Range=[8 20]
+NumMFs=3
+MF1='low':'gauss2mf',[1.63 7.52 0.86318167614209 9.42507645259939]
+MF2='med':'gauss2mf',[0.775 11.4 0.790506714065075 12.5076452599388]
+MF3='high':'gauss2mf',[0.675960394929977 14.1223241590214 1.63 20.5]
+
+[Output1]
+Name='activity'
+Range=[0 1]
+NumMFs=2
+MF1='nact':'trapmf',[0 0 0.4 0.6]
+MF2='act':'trapmf',[0.4 0.6 1 1]
+
+[Rules]
+4 1 0 1, 2 (1) : 1
+0 3 0 2, 1 (1) : 2
+0 2 0 0, 1 (1) : 1
