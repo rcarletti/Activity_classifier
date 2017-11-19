@@ -30,6 +30,7 @@ function plot_feat(features_ds, feats, names, sensor, time_interval)
     global total_features;
 
     figure;
+    colors = ["+r", "+g", "+b", "+k"];
     
     ff = zeros(length(feats), 40 * time_interval);
     for f_id = 1:length(feats)
@@ -40,16 +41,19 @@ function plot_feat(features_ds, feats, names, sensor, time_interval)
             s_id = sensor;
         end
         
+        subplot(2,2,f_id);
+        hold on; grid on;
+        title(names(feats(f_id)));
+        
         for a_id = 1:4
             for v_id = 1:(10 * time_interval)
                 ff(f_id, (a_id - 1) * 10 * time_interval + v_id) = ...
                     dsgetfeature(features_ds, feats(f_id), s_id, a_id, v_id, time_interval);
             end
+            
+            plot(ff(f_id, ((1:10 * time_interval) + 10 * time_interval * (a_id-1))), ...
+                repmat(a_id, 1, 10 * time_interval), colors(a_id), 'markers', 6);
         end
-        
-        subplot(2,2,f_id);
-        plot(ff(f_id, :));
-        title(names(feats(f_id)));
     end
     
     hold off;

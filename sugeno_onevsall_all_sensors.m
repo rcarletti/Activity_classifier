@@ -1,14 +1,36 @@
 %% ANFIS one-vs-all
 
-for time_interval = [1,2,4]
-    for i = 1:4
-        [onevsall_all{time_interval}{i}.sugeno, onevsall_all{time_interval}{i}.fis_input] = ...
-            perform_sugeno(onevsall_all{time_interval}{i}.net.features, i, features_ds, time_interval);
+if ~exist('sugeno', 'var')
+    sugeno = struct;
+end
+
+if ~isfield(sugeno, 'onevsall_all')
+    sugeno.onevsall_all = cell(1,4);
+    
+    for time_interval = [1,2,4]
+        sugeno.onevsall_all{time_interval} = cell(1,4);
     end
 end
 
+time_interval = 4;
+activity = 4;
+
+for i = 1:100
+    [fis, inputs] = perform_sugeno(...
+        onevsall_all{time_interval}{activity}.features, ...
+        activity, features_ds, time_interval);
+    
+    if ~isfield(sugeno.onevsall_all{time_interval}{activity}, 'fis') || ...
+       fis.error < sugeno.onevsall_all{time_interval}{activity}.fis.error
+        sugeno.onevsall_all{time_interval}{activity}.fis = fis;
+        sugeno.onevsall_all{time_interval}{activity}.inputs = inputs;
+    end
+end
+
+plot_sugeno(sugeno.onevsall_all{time_interval}{activity}.fis);
+
 function [sugeno, input] = perform_sugeno(features, act, features_ds, time_interval)
-% choose parameters for ANFIS - one-vs-all classifier (independent sensors)
+% choose parameters for ANFIS - one-vs-all classifier (unified sensors)
 
     global total_features
 
@@ -29,28 +51,24 @@ function [sugeno, input] = perform_sugeno(features, act, features_ds, time_inter
         end
     end
 
-    %shuffle columns
+    % shuffle columns
 
     input_perm = input(randperm(size(input,1)),:);
 
     % select ANFIS data - 70%-30% split
 
     ntrn = floor(40 * 0.7 * time_interval);
-    nchk = (40 * time_interval) - ntrn;
 
     sugeno = struct;
     sugeno.training_data = input_perm(1:ntrn, 1:5);
     sugeno.validation_data = input_perm(ntrn+1:(40 * time_interval), 1:5);
 
     % generate and train the sugeno FIS
-
-    nmfs = 2;
-    epochs = 150;
+    epochs = 50;
 
     % generate initial FIS
-    sugeno.genopt = genfisOptions('GridPartition');
-    sugeno.genopt.NumMembershipFunctions = nmfs;
-    sugeno.genopt.InputMembershipFunctionType = 'gbellmf';
+    sugeno.genopt = genfisOptions('SubtractiveClustering', ...
+                                  'ClusterInfluenceRange', 0.3);
 
     % set FIS options
     sugeno.fisopt = anfisOptions('EpochNumber', epochs, 'OptimizationMethod', 1, 'InitialFIS', ...
@@ -67,22 +85,13 @@ function [sugeno, input] = perform_sugeno(features, act, features_ds, time_inter
     sugeno.training_out = evalfis(sugeno.training_data(:,1:4), sugeno.fis);
     sugeno.validation_out = evalfis(sugeno.validation_data(:,1:4), sugeno.fis);
 
-    % plot output data
-%     figure;
-% 
-%     subplot(2,2,1);
-%     plot(1:ntrn, sugeno.training_data(:,5), '*r', 1:ntrn, sugeno.training_out(:,1), '*b');
-%     legend('Training Data', 'ANFIS Output');
-% 
-%     subplot(2,2,2);
-%     plot(1:nchk, sugeno.validation_data(:,5), '*r', 1:nchk, sugeno.validation_out(:,1), '*b');
-%     legend('Training Data', 'ANFIS Output');
-% 
-%     subplot(2,2,[3,4]);
-%     plot(1:epochs, sugeno.train_err, '.r', 1:epochs, sugeno.check_err, '*b');
-%     legend('Training error', 'Validation error');
+    % compare crisp validation output values
+    sugeno.crisp_out = round(sugeno.validation_out);
+    sugeno.crisp_out(sugeno.crisp_out > 1) = 1;
+    sugeno.crisp_out(sugeno.crisp_out < 0) = 0;
+
+    % compute accuracy and error rate
+    sugeno.error = sum(abs(sugeno.crisp_out - sugeno.validation_data(:,5)) > 0) ...
+        / length(sugeno.crisp_out);
+    sugeno.accuracy = 1 - sugeno.error;
 end
-
-
-    
-    

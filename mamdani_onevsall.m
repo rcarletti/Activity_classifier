@@ -63,9 +63,13 @@ function mamdani = eval_mamdani_onevsall(filename, act, features, features_ds, .
     mamdani.rms = rms(mamdani.outputs - mamdani.targets);
     mamdani.crisp = (mamdani.outputs > 0.5);
     
+    mamdani.error = sum(abs(mamdani.crisp - mamdani.targets) > 0) ...
+        / length(mamdani.outputs);
+    mamdani.accuracy = 1 - mamdani.error;
+    
     % Plot target and output values
     figure;
-    plot(1:(40 * time_interval), mamdani.crisp, '*b', ...
+    plot(1:(40 * time_interval), mamdani.crisp, 'ob', ...
          1:(40 * time_interval), mamdani.targets, '+r', ...
          1:(40 * time_interval), mamdani.outputs);
     
